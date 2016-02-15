@@ -1,0 +1,33 @@
+{
+  "name": "voootApi",
+  "private": true,
+  "version": "0.0.0",
+  "description": "a Sails application",
+  "keywords": [],
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "ejs": "^2.4.1",
+    "icalendar": "^0.7.1",
+    "include-all": "~0.1.6",
+    "jsonwebtoken": "^5.5.4",
+    "moment": "^2.11.2",
+    "passport": "^0.3.2",
+    "passport-jwt": "^2.0.0",
+    "passport-local": "^1.0.0",
+    "rc": "1.0.1",
+    "sails": "~0.12.0",
+    "sails-disk": "~0.10.9",
+    "sails-mongo": "^0.12.0"
+  },
+  "scripts": {
+    "debug": "node debug app.js",
+    "start": "node app.js"
+  },
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Arn/voootApi.git"
+  },
+  "author": "Arn",
+  "license": ""
+}
