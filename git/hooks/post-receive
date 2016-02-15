@@ -1,0 +1,17 @@
+#!/bin/bash
+while read oldrev newrev ref
+do
+    if [[ $ref =~ .*/master$ ]];
+    then
+        echo "Master ref received.  Deploying master branch to production..."
+        git --work-tree=/var/www/vooot/voootApi --git-dir=/var/git/vooot/voootApi/.git checkout -f
+      	cd /var/www/vooot/voootApi
+      	cp /home/admin/config/vooot/voootApi/local.js ./config/local.js
+      	npm install
+      	pm2 restart voootApi
+      	echo "done."
+
+    else
+        echo "Ref $ref successfully received.  Doing nothing: only the master branch may be deployed on this server."
+    fi
+done

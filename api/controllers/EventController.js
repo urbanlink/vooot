@@ -33,6 +33,7 @@ module.exports = {
 		});
 	},
 
+
 	ics: function(req, res) {
     var Events = sails.models.event;
 
