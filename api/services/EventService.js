@@ -19,6 +19,14 @@ module.exports = {
         if(err) { throw err; }
         next(result);
       });
+  },
+
+  create: function(event, next){
+    console.log(event);
+    Event.create(event).exec(function(err, result) {
+      if(err) { throw err; }
+      next(result);
+    });
   }
 
 };

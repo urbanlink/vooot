@@ -46,6 +46,6 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
-  'GET /event/:id/event.ics': 'EventController.ics',
+  'GET /events/sync': 'EventController.sync'
 
 };
