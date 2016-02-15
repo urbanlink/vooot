@@ -4,8 +4,9 @@ do
     if [[ $ref =~ .*/master$ ]];
     then
         echo "Master ref received. Deploying master branch to production..."
-        git --work-tree=/var/www/vooot/api --git-dir=/var/git/vooot/api/ checkout -f
+        git --work-tree=/var/www/vooot/api --git-dir=/var/git/vooot/api/.git checkout -f
       	cd /var/www/vooot/api
+        ls -la
       	cp /home/admin/config/vooot/api/local.js ./config/local.js
       	npm install
       	pm2 start pm2.json
