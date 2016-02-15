@@ -1,0 +1,15 @@
+{
+  "name"        : "vooot-api",
+  "script"      : "app.js",
+  "merge_logs"  : true,
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "env_production" : {
+     "NODE_ENV": "production"
+  },
+  "env_staging" : {
+     "NODE_ENV" : "staging",
+     "TEST"     : true
+  }
+}
