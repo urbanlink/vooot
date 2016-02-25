@@ -41,7 +41,9 @@ module.exports = {
     var calendar = new icalendar.iCalendar();
     calendar.properties.PRODID = [];
     calendar.addProperty('PRODID', '-//voOot//Calendar//EN');
-
+    calendar.addProperty('SEQUENCE', '0');
+    calendar.addProperty('METHOD', 'REQUEST');
+    
     // Add events to calendar
     for (var i=0; i<events.length; i++) {
       var event = events[i];

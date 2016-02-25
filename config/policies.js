@@ -22,15 +22,15 @@ module.exports.policies = {
   '*': ['isAuthenticated'],
 
   AuthController: {
-      '*': true
+    '*': true
   },
   EventController: {
     '*': true
   },
 
   PingController: {
-      '*': 'hasToken',
-      'protected': 'isAuthenticated'
+    '*': 'hasToken',
+    'protected': 'isAuthenticated'
   }
 
   /***************************************************************************

@@ -21,6 +21,7 @@ module.exports = {
 				Events.toiCal(result, function(err, ical) {
 
 	        sails.log.info(err, ical);
+					res.set('Content-Type', 'text/calendar');
 	        return res.send(ical.toString());
 	      });
 			} else {
