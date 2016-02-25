@@ -1,9 +1,9 @@
 {
   "name": "voootApi",
   "private": true,
-  "version": "0.0.0",
-  "description": "a Sails application",
-  "keywords": [],
+  "version": "0.1.0",
+  "description": "API for voOot",
+  "keywords": ["vooot"],
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
     "ejs": "^2.4.1",
@@ -27,8 +27,8 @@
   "main": "app.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Arn/voootApi.git"
+    "url": "git://github.com/urbanlink/vooot-api.git"
   },
-  "author": "Arn",
-  "license": ""
+  "author": "A van der Pluijm",
+  "license": "GNU"
 }
