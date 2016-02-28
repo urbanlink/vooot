@@ -1,5 +1,9 @@
 # CHANGELOG
 
+
+## 0.2.0
+- Set up Apiary documentation
+
 ## 0.1.0
 - Use git-flow
 - Setup website vooot.nl
