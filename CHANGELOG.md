@@ -1,4 +1,8 @@
 # CHANGELOG
+___
+
+## 0.3.0
+- Define Technology Stack
 
 
 ## 0.2.0
