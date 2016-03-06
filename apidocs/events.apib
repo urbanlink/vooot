@@ -1,0 +1,288 @@
+# Group Events
+This section describes the Events.
+Development references for events:
+  - [https://api.eventful.com/docs](https://api.eventful.com/docs)
+  - [http://www.codeproject.com/Articles/17980/Adding-iCalendar-Support-to-Your-Program-Part](http://www.codeproject.com/Articles/17980/Adding-iCalendar-Support-to-Your-Program-Part)
+  - [https://orebrokommun.github.io/Open-Meal-Information/doc/icalendar.html](https://orebrokommun.github.io/Open-Meal-Information/doc/icalendar.html)
+  - [http://www.mashupguide.net/1.0/html/ch15s04.xhtml](http://www.mashupguide.net/1.0/html/ch15s04.xhtml)
+  - [http://icalendar.readthedocs.org/en/latest/install.html](http://icalendar.readthedocs.org/en/latest/install.html)
+
+
+## Event [/events/{id}]
+This resource represents one particular event identified by its *id*.
+
++ Parameters
+    + id (string)
+
+      Id of a user.
+
++ Attributes (Event Base)
+    + id: 12 (number, required)
+    + created_at: 1415203908 (number) - Time stamp
+    + updated_at: 1415303908 (number) - Time stamp
+
+
+### Retrieve an Event [GET]
+Return the information for the Event
+
++ Request (application/json)
+
++ Response 200 (application/json)
+
+    + Attributes (Event)
+
++ Response 404 (application/json)
+
+    {
+        "error": {
+            "code": 404,
+            "message": "The requested URL was not found on the server.  If you entered the URL manually please check your spelling and try again."
+        },
+        "status": "ERR"
+    }
+
+
+### Edit an Event [PUT]
+Edit the information of the Event
+
++ Attributes (Event Base)
+
++ Request (application/json)
+
++ Response 201 (application/json)
+
+    + Attributes (Event)
+
++ Response 422 (application/json)
+
+    {
+        "error": {
+            "code": 404,
+            "message": "The requested URL was not found on the server.  If you entered the URL manually please check your spelling and try again."
+        },
+        "status": "ERR"
+    }
+
+
+### Delete Event [DELETE]
+Delete an Event
+
++ Request (application/json)
+
++ Response 200 (application/json)
+
+    + Body
+        {
+          "status": "ok"
+          "deleted": true
+        }
+
++ Response 404 (application/json)
+
+    {
+        "error": {
+            "code": 404,
+            "message": "The requested URL was not found on the server.  If you entered the URL manually please check your spelling and try again."
+        },
+        "status": "ERR"
+    }
+
+## Events [/events{?keywords,location,date,category,within,units,count_only,sort_order,sort_direction,page_size,page_number}]
+
++ Attributes (array[Event])
+
+### Create an Event [POST]
+Creates a new Event.
+
++ Attributes (Event Base)
+
++ Request (application/json)
+    + Headers
+        Authorization: auth_code
+
++ Response 200
+    + Attributes (Event)
+
++ Response 422 (application/json)
+    + Body
+
+          {
+              "status": "ERR",
+              "error": {
+                  "code": 422,
+                  "message": "Insertion failure: 1 document(s) contain(s) error(s)"
+              },
+              "issues": {
+                  "login": "value m1ch3l is not unique"
+              }
+          }
+
+### List all Events [GET]
+Return a list of events bases on query parameters.
+
++ Parameters
+    + keywords: `vergadering` (string, optional) - The search keywords
+    + location: `The Hague` (string, optional) - A location name to use in filtering the search results. Locations in the form 'San Diego', 'San Diego, TX', 'London', 'United Kingdom', and 'Calgary, Alberta, Canada' are accepted, as are postal codes ('92122'). Full addresses ('1 Infinite Loop, Cupertino, CA') and common geocoordinate formats ('32.746682, -117.162741') are also accepted, but the within parameter is recommended in order to set a search radius.
+    + date: `Today` (string, optional) - Limit this list of results to the specified date range. Date ranges are specified by label. Currently supported labels include All, Future, Past, Today, Last Week, This Week, Next week, and months by name, e.g. October.
+    + category: (string, optional) - Limit the search results to this category ID. A list of categories may be specified separated by commas. See /event/categories for a list of categories and their IDs.
+    + within: `50` (integer, optional) - If within is set and the location parameter resolves to a specific geolocation, the search will be restricted to the specified radius. If the location parameter does not resolve to a specific location, this parameter is ignored.
+    + units: `km` (string, optional) - One of "mi" or "km", the units of the "within" parameter.
+        + Default: `km`
+        + Members
+            + `km`
+            + `mi`
+    + count_only: `false` (boolean, optional) - If count_only is set, an abbreviated version of the output will be returned. Only total_items and search_time elements are included in the result.
+        + Default: `false`
+        + Members
+            + `true`
+            + `false`
+    + sort_order: `date` (string, optional) - The sort order.
+        + Default: `date`
+        + Members
+            + `popularity`
+            + `date`
+            + `title`
+            + `relevance`
+            + `venue_name`
+    + sort_direction (string, optional) - One of 'ascending' or 'descending'. Default varies by sort_order.
+    + page_size: `50` (number, optional) - The desired number of results per page. Maximum: 50.
+        + Default: `50`
+    + page_number: `0` (number, optional) - The desired page number.
+        + Default: `0`
+
++ Response 200 (application/json)
+    + Attributes (Events)
+
+
+
+## iCalendar [/events/feed{?keywords,location,date,within,units,sort_order,sort_direction,page_size}]
+Get events in a feed format.
+
+### iCalendar feed [GET]
+Get events in iCalendar format. This function handles event search and returns the results in an [iCalendar](http://en.wikipedia.org/wiki/ICalendar) ([RFC-2445](http://www.ietf.org/rfc/rfc2445.txt)) format, not in XML. Output from this function is an VCALENDAR block.
+
++ Parameters
+    + keywords: `vergadering` (string, optional) - The search keywords
+    + location: `The Hague` (string, optional) - A location name to use in filtering the search results. Locations in the form 'San Diego', 'San Diego, TX', 'London', 'United Kingdom', and 'Calgary, Alberta, Canada' are accepted, as are postal codes ('92122'). Full addresses ('1 Infinite Loop, Cupertino, CA') and common geocoordinate formats ('32.746682, -117.162741') are also accepted, but the within parameter is recommended in order to set a search radius.
+    + date: `Today` (string, optional) - Limit this list of results to the specified date range. Date ranges are specified by label. Currently supported labels include All, Future, Past, Today, Last Week, This Week, Next week, and months by name, e.g. October.
+    + within: `50` (number, optional) - If within is set and the location parameter resolves to a specific geolocation, the search will be restricted to the specified radius. If the location parameter does not resolve to a specific location, this parameter is ignored.
+    + units: `km` (string, optional) - One of "mi" or "km", the units of the "within" parameter.
+        + Default: `km`
+        + Members
+            + `km`
+            + `mi`
+    + sort_order: `date` (string, optional) - The sort order.
+        + Default: `date`
+        + Members
+            + `popularity`
+            + `date`
+            + `title`
+            + `relevance`
+            + `venue_name`
+    + sort_direction: (string, optional) - One of 'ascending' or 'descending'. Default varies by sort_order.
+    + page_size: `50` (number, optional) - The desired number of results per page. Maximum: 50.
+      + Default: `50`
+
+
++ Request (application/json)
+
+      + Headers
+
+            Authorization: 12345
+
+
++ Response 200 (application/calendar)
+
+      + Body
+
+            BEGIN:VCALENDAR
+            METHOD:PUBLISH
+            CALSCALE:GREGORIAN
+            PRODID:-//EVDB//vooot.nl//EN
+            VERSION:2.0
+            X-WR-CALNAME:Eventful results for "meeting" in "den haag"
+                BEGIN:VEVENT
+                    DTSTART:20051111T190000
+                    DTSTAMP:20050902T183453Z
+                    SUMMARY:Raadsvergadering Den Haag
+                    DESCRIPTION:De raadsvergadering in Den Haag
+                    LOCATION:Raadszaal, Stadhuis Den Haag
+                    SEQUENCE:0
+                    UID:E0-001-000318135-0
+                    URL:http://eventful.com/E0-001-000318135-0
+                END:VEVENT
+                ...
+            END:VCALENDAR
+
+## RSS [/events/rss{?keywords,location,date,within,units,sort_order,sort_direction,page_size}]
+Get events in a feed format.
+### RSS feed [GET]
+Get events in RSS format. This function handles event search and returns the results in an [RSS 2.0](http://en.wikipedia.org/wiki/Really_Simple_Syndication) ([Specification](http://blogs.law.harvard.edu/tech/rss)) XML format.
+
++ Parameters
+    + keywords: `vergadering` (string, optional) - The search keywords
+    + location: `The Hague` (string, optional) - A location name to use in filtering the search results. Locations in the form 'San Diego', 'San Diego, TX', 'London', 'United Kingdom', and 'Calgary, Alberta, Canada' are accepted, as are postal codes ('92122'). Full addresses ('1 Infinite Loop, Cupertino, CA') and common geocoordinate formats ('32.746682, -117.162741') are also accepted, but the within parameter is recommended in order to set a search radius.
+    + date: `Today` (string, optional) - Limit this list of results to the specified date range. Date ranges are specified by label. Currently supported labels include All, Future, Past, Today, Last Week, This Week, Next week, and months by name, e.g. October.
+    + within: `50` (number, optional) - If within is set and the location parameter resolves to a specific geolocation, the search will be restricted to the specified radius. If the location parameter does not resolve to a specific location, this parameter is ignored.
+    + units: `km` (string, optional) - One of "mi" or "km", the units of the "within" parameter.
+        + Default: `km`
+        + Members
+            + `km`
+            + `mi`
+    + sort_order: `date` (string, optional) - The sort order.
+        + Default: `date`
+        + Members
+            + `popularity`
+            + `date`
+            + `title`
+            + `relevance`
+            + `venue_name`
+    + sort_direction (string, optional) - One of 'ascending' or 'descending'. Default varies by sort_order.
+    + page_size: `50` (number, optional) - The desired number of results per page. Maximum: 50.
+      + Default: `50`
+
+
++ Request (application/json)
+
+      + Headers
+
+            Authorization: 12345
+
+
++ Response 200 (application/xml)
+
+      + Body
+
+            <?xml version="1.0" encoding="UTF-8"?>
+              <rss version="2.0">
+                <channel>
+                  <title>Eventful results for "concerts" in "San Diego"</title>
+                  <link>http://eventful.com</link>
+                  <description>...</description>
+                  <language>en-US</language>
+                  <copyright>...</copyright>
+                  <category>Events</category>
+                  <generator>EVDB RSS Generator v1.2</generator>
+                  <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+                  <ttl>60</ttl>
+                  <item>
+                    <title>Rolling Stones</title>
+                    <link>http://eventful.com/events/E0-001-000318135-0</link>
+                    <description>...</description>
+                    <category></category>
+                    <pubDate>Fri, 02 Sep 2005 11:34:53 -0700</pubDate>
+                    <guid isPermaLink="true">http://eventful.com/events/E0-001-000318135-0</guid>
+                  </item>
+                  ...
+                  <pubDate>Fri, 02 Sep 2005 11:34:53 -0700</pubDate>
+                    <lastBuildDate>Fri, 02 Sep 2005 11:34:53 -0700</lastBuildDate>
+                </channel>
+              </rss>
+            </xml>
+
+# Data Structures
+
+## Event Base (object)
+  + title: Event title (string) - The title of the evnet.
+  + summary: Hello World (string) - The event summary.
+  + location: The Hague (string) - The location of the event.
