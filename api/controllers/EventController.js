@@ -36,7 +36,6 @@ module.exports = {
 		});
 	},
 
-
 	sync: function(req, res) {
 		request('http://denhaag.raadsinformatie.nl/api/calendar/callback_function?year=2016&month=3&callback=callback_function', function(error, response, body) {
 		  if (!error && response.statusCode === 200) {

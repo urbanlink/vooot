@@ -6,17 +6,48 @@ var icalendar = require('icalendar');
 module.exports = {
 
   attributes: {
-    // Attributes
-    title: {
+    // Popolo fields
+    name: {
       type: 'string'
     },
     description: {
       type: 'text'
     },
-    startDate: {
+    start_date: {
       type: 'datetime'
     },
-    endDate: {
+    end_date: {
+      type: 'datetime'
+    },
+    location: {
+      type: 'string'
+    },
+    status: {
+      type: 'string'
+      // cancelled, confirmed, tentative
+    },
+    classification: {
+      type: 'string'
+    },
+    organization_id: {
+      model: 'organization'
+    },
+    attendees: {
+      type: 'array'
+    },
+    parent_id: {
+      type: 'string'
+    },
+
+    // Associations
+    identifiers: {
+      collection: 'identifier',
+      via: 'event'
+    },
+
+
+    // voOot fields
+    last_sync_date: {
       type: 'datetime'
     },
 
@@ -24,11 +55,11 @@ module.exports = {
     toEvent: function() {
       var self = this;
       var vevent = new icalendar.VEvent(self.id);
-      var summary = self.title;
+      var summary = self.name;
       vevent.setSummary(summary);
       vevent.setDescription(self.description);
-      vevent.setDate(this.startDate, this.endDate);
-      var location = 'Den Haag';
+      vevent.setDate(this.start_date, this.end_date);
+      var location = this.location;
       vevent.addProperty('LOCATION', location);
 
       return vevent;
@@ -43,11 +74,11 @@ module.exports = {
     calendar.addProperty('PRODID', '-//voOot//Calendar//EN');
     calendar.addProperty('SEQUENCE', '0');
     calendar.addProperty('METHOD', 'REQUEST');
-    
+
     // Add events to calendar
     for (var i=0; i<events.length; i++) {
       var event = events[i];
-      if (event.startDate && event.endDate) {
+      if (event.start_date && event.end_date) {
         var vevent = event.toEvent();
         calendar.addComponent(vevent);
       }

@@ -27,6 +27,9 @@ module.exports.policies = {
   EventController: {
     '*': true
   },
+  organizationController: {
+    '*': true
+  },
 
   PingController: {
     '*': 'hasToken',

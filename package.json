@@ -3,14 +3,18 @@
   "private": true,
   "version": "0.3.0",
   "description": "API for voOot",
-  "keywords": ["vooot"],
+  "keywords": [
+    "vooot"
+  ],
   "dependencies": {
+    "async": "^1.5.2",
     "bcrypt-nodejs": "0.0.3",
     "ejs": "^2.4.1",
     "icalendar": "^0.7.1",
     "include-all": "~0.1.6",
     "jsonwebtoken": "^5.5.4",
     "moment": "^2.11.2",
+    "node-schedule": "^1.1.0",
     "passport": "^0.3.2",
     "passport-jwt": "^2.0.0",
     "passport-local": "^1.0.0",

@@ -9,3 +9,13 @@ Documentation is available at [vooot.nl/documentation](https://vooot.nl/document
 
 # Installation
 Install docker and start dockerfile
+
+
+## Local development
+
+    mongod
+    cd adminMongo
+    npm start
+    cd voootApi
+    sails lift
+    
