@@ -4,8 +4,13 @@
 
 module.exports = {
   find: function(params, next) {
+    console.log('params', params);
+    var p = {};
+    p.some = params.some || null;
+    p.organization_id = params.organization_id || null;
+
     Event
-      .find()
+      .find(p)
       .populate('identifiers')
       .exec(function(err, result) {
         if(err) { throw err; }
@@ -23,7 +28,6 @@ module.exports = {
   },
 
   create: function(event, next){
-    console.log(event);
     Event.create(event).exec(function(err, result) {
       if(err) { throw err; }
       next(result);

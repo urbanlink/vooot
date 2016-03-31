@@ -12,7 +12,6 @@ module.exports = function (sails) {
       sails.after('hook:orm:loaded', function () {
         Object.keys(sails.config.crontab).forEach(function(key) {
           var val = sails.config.crontab[key];
-          console.log('scheduling job ', key, val);
           schedule.scheduleJob(key, val);
         });
       });

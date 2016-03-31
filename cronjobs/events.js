@@ -17,34 +17,47 @@ module.exports = {
     sails.log('Syncing all future events for organizations. ');
     // Get organizations and source url for events.
     sails.log('Fetching all organizations and source url for events.');
-    OrganizationService.find(null, function(result){
-      if (result && result.length>0) {
-        sails.log('Found ' + result.length + ' organization(s)');
-        for (var i=0; i<result.length;i++){
+    OrganizationService.find(null, function(organizations){
+      sails.log('Found ' + organizations.length + ' organization(s)');
+      if (organizations && organizations.length>0) {
+        for (var i=0; i<organizations.length; i++) {
+          var organization = organizations[ i];
           // Get list of events for next 12 months of this organization.
-          sails.log('Fetching future 12 month events for organization: ', result[ i]);
+          sails.log('Fetching future 12 month events for organization: ' + organization.name);
 
           var queries = createMonthCalls();
           for(var k=0; k<queries.length; k++){
-            queries[ k] = result[ i].meta.sources.events + queries[ k];
+            queries[ k] = organization.meta.sources.events + queries[ k];
           }
 
-          async.map(queries, fetchEvents, function(err, results) {
+          async.map(queries, fetchEvents, function(err, events) {
             var meetings = [];
 
-            if (results && results.length>0){
-              for (var i=0;i<results.length;i++){
-                for (var k=0; k<results[ i].meetings.length; k++) {
-                  meetings.push(results[ i].meetings[ k]);
+            if (events && events.length>0){
+              for (var l=0; l<events.length; l++) {
+                if (events[ l] && events[ l].meetings) {
+                  for (var m=0; m<events[ l].meetings.length; m++) {
+                    var event = events[ l].meetings[ m];
+                    event.organization_id = organization.id;
+                    event.identifier_scheme = 'notubiz';
+                    event.identifier = event.id;
+                    //process notubiz data
+                    event.name = event.description;
+                    event.start_date = moment(event.date + ' ' + event.time, 'DD-MM-YYYY HH:mm').format();
+                    event.end_date = moment(event.start_date).add(2, 'h').format();
+                    // add the single meeting to the new meeting list.
+                    meetings.push(event);
+                  }
                 }
               }
               // Update or create each event in the voOot database.
               sails.log('Updating or creating events.');
               updateEvents(meetings, function(result) {
-
-
+              //
+              //
               });
             }
+
           });
         }
       } else {
@@ -57,17 +70,16 @@ module.exports = {
 function updateEvents(events, cb) {
   sails.log('updating events');
   async.eachSeries(events, function interatee(event, next){
-    event.identifier_scheme = 'notubiz';
-    event.identifier = event.id;
     delete event.id;
-    sails.log('updating event ', event);
+    //sails.log('updating event ', event);
 
     EventService.updateOrCreate(event, function(result){
-      sails.log('resu;t', result);
+      //sails.log('Update or create result', result);
       next();
     });
 
   }, function(err){
+
     sails.log('Iterating done');
   });
 }
