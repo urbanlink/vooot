@@ -1,38 +1,23 @@
 {
-  "name": "voootApi",
-  "private": true,
-  "version": "0.3.0",
-  "description": "API for voOot",
-  "keywords": [
-    "vooot"
-  ],
+  "name": "vooot-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
   "dependencies": {
-    "async": "^1.5.2",
-    "bcrypt-nodejs": "0.0.3",
-    "ejs": "^2.4.1",
+    "body-parser": "^1.15.0",
+    "compression": "^1.6.1",
+    "errorhandler": "^1.4.3",
     "icalendar": "^0.7.1",
-    "include-all": "~0.1.6",
-    "jsonwebtoken": "^5.5.4",
-    "moment": "^2.11.2",
+    "method-override": "^2.3.5",
+    "mysql": "^2.10.2",
     "node-schedule": "^1.1.0",
-    "passport": "^0.3.2",
-    "passport-jwt": "^2.0.0",
-    "passport-local": "^1.0.0",
-    "rc": "1.0.1",
-    "request": "^2.69.0",
-    "sails": "~0.12.0",
-    "sails-disk": "~0.10.9",
-    "sails-mongo": "^0.12.0"
+    "request": "^2.69.0"
   },
+  "devDependencies": {},
   "scripts": {
-    "debug": "node debug app.js",
-    "start": "node app.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
-  "main": "app.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/urbanlink/vooot-api.git"
-  },
-  "author": "A van der Pluijm",
-  "license": "GNU"
+  "author": "",
+  "license": "ISC"
 }

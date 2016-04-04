@@ -1,23 +1,32 @@
 'use strict';
 
-// https://github.com/mysociety/popit/blob/master/lib/schemas/other-name.js
-module.exports = {
-  attributes: {
+module.exports = function(sequelize, DataTypes) {
+
+  var Othername = sequelize.define('Othername', {
+
     name: {
-      type: 'string',
+      type: DataTypes.STRING,
       required: true,
     },
     note: {
-      type: 'string'
+      type: DataTypes.STRING,
     },
     start_date: {
-      type: 'datetime'
+      type: DataTypes.DATE,
     },
     end_date: {
-      type: 'datetime'
-    },
-    organization: {
-      model: 'organization'
+      type: DataTypes.DATE
     }
-  }
+  }, {
+    classMethods: {
+      associate: function(models) {
+        Othername.belongsTo(models.Organization, {
+          foreignKey: 'organization_id',
+          as: 'organization'
+        });
+      }
+    }
+  });
+
+  return Othername;
 };

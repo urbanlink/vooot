@@ -1,72 +1,13 @@
-/* globals CipherService */
-
 'use strict';
 
-/**
- * User
- * @description :: Model for storing users
- */
+module.exports = function(sequelize, DataTypes) {
 
-module.exports = {
-    schema: true,
+  var Users = sequelize.define('Users', {
 
-    attributes: {
-        username: {
-            type: 'string',
-            required: true,
-            unique: true,
-            alphanumericdashed: true
-        },
+    role: DataTypes.INTEGER,
 
-        password: {
-            type: 'string'
-        },
+    email: DataTypes.STRING
+  });
 
-        email: {
-            type: 'string',
-            email: true,
-            required: true,
-            unique: true
-        },
-
-        firstName: {
-            type: 'string',
-            defaultsTo: ''
-        },
-
-        lastName: {
-            type: 'string',
-            defaultsTo: ''
-        },
-
-        photo: {
-            type: 'string',
-            defaultsTo: '',
-            url: true
-        },
-
-        socialProfiles: {
-            type: 'object',
-            defaultsTo: {}
-        },
-
-        toJSON: function () {
-            var obj = this.toObject();
-
-            delete obj.password;
-            delete obj.socialProfiles;
-
-            return obj;
-        }
-    },
-
-    beforeUpdate: function (values, next) {
-        CipherService.hashPassword(values);
-        next();
-    },
-
-    beforeCreate: function (values, next) {
-        CipherService.hashPassword(values);
-        next();
-    }
+  return Users;
 };

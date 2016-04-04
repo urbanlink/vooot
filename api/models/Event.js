@@ -1,89 +1,53 @@
 'use strict';
 
-var icalendar = require('icalendar');
-//var moment = require('moment');
+module.exports = function(sequelize, DataTypes) {
 
-module.exports = {
+  var Event = sequelize.define('Event', {
 
-  attributes: {
-    // Popolo fields
-    name: {
-      type: 'string'
-    },
-    description: {
-      type: 'text'
-    },
-    start_date: {
-      type: 'datetime'
-    },
-    end_date: {
-      type: 'datetime'
-    },
-    location: {
-      type: 'string'
-    },
-    status: {
-      type: 'string'
-      // cancelled, confirmed, tentative
-    },
-    classification: {
-      type: 'string'
-    },
-    organization_id: {
-      model: 'organization'
-    },
-    attendees: {
-      type: 'array'
-    },
-    parent_id: {
-      type: 'string'
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
     },
 
-    // Associations
-    identifiers: {
-      collection: 'identifier',
-      via: 'event'
-    },
+    name: DataTypes.STRING,
 
+    description: DataTypes.TEXT,
+
+    start_date: DataTypes.DATE,
+
+    end_date: DataTypes.DATE,
+
+    location: DataTypes.STRING,
+
+    status: DataTypes.STRING,
+
+    classification: DataTypes.STRING,
+
+    attendees: DataTypes.STRING,
 
     // voOot fields
-    last_sync_date: {
-      type: 'datetime'
-    },
+    last_sync_date: DataTypes.DATE
 
-    // Attribute methods
-    toEvent: function() {
-      var self = this;
-      var vevent = new icalendar.VEvent(self.id);
-      var summary = self.name;
-      vevent.setSummary(summary);
-      vevent.setDescription(self.description);
-      vevent.setDate(this.start_date, this.end_date);
-      var location = this.location;
-      vevent.addProperty('LOCATION', location);
+  }, {
+    classMethods: {
+      associate: function(models) {
+        Event.belongsTo(Event, {
+          foreignKey: 'parent_id',
+          as: 'parent'
+        });
 
-      return vevent;
-    }
-  },
+        Event.belongsTo(models.Organization, {
+          foreignKey: 'organization_id',
+          as: 'organization'
+        });
 
-  // Generate iCalendar file
-  toiCal: function(events, callback) {
-
-    var calendar = new icalendar.iCalendar();
-    calendar.properties.PRODID = [];
-    calendar.addProperty('PRODID', '-//voOot//Calendar//EN');
-    calendar.addProperty('SEQUENCE', '0');
-    calendar.addProperty('METHOD', 'REQUEST');
-
-    // Add events to calendar
-    for (var i=0; i<events.length; i++) {
-      var event = events[i];
-      if (event.start_date && event.end_date) {
-        var vevent = event.toEvent();
-        calendar.addComponent(vevent);
+        Event.hasMany(models.Identifier, {
+          as: 'identifiers'
+        });
       }
     }
+  });
 
-    return callback(null, calendar);
-  }
+  return Event;
 };

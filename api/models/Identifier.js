@@ -1,28 +1,31 @@
 'use strict';
 
-// https://github.com/mysociety/popit/blob/master/lib/schemas/identifier.js
+module.exports = function(sequelize, DataTypes) {
 
-module.exports = {
+  var Identifier = sequelize.define('Identifier', {
 
-  attributes: {
-    identifier: {
-      type: 'string',
-      required: true
-    },
     scheme: {
-      type: 'string',
-      required: true
+      type: DataTypes.STRING,
+      allowNull: false
     },
-
-
-    // association with organization if needed
-    organization: {
-      model: 'organization'
-    },
-
-    event: {
-      model: 'event'
+    identifier: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
+  }, {
+    classMethods: {
+      associate: function(models) {
+        Identifier.belongsTo(models.Organization, {
+          foreignKey: 'organization_id',
+          as: 'organization'
+        });
+        Identifier.belongsTo(models.Event, {
+          foreignKey: 'event_id',
+          as: 'event'
+        });
+      }
+    }
+  });
 
-  }
+  return Identifier;
 };
