@@ -27,6 +27,10 @@ module.exports = function(app){
     eventCtrl.destroy
   );
 
+  router.post('/sync',
+    eventPermissions.canUpdate,
+    eventCtrl.sync
+  );
 
   app.use('/event', router);
 };

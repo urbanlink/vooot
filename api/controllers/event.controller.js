@@ -11,11 +11,11 @@ function handleError(res, err) {
 
 //
 function toEvent(event) {
-  var vevent = new icalendar.VEvent(event);
-    vevent.setSummary(event.name);
-    vevent.setDescription(event.description);
-    vevent.setDate(event.start_date, event.end_date);
-    vevent.addProperty('LOCATION', event.location);
+  var vevent = new icalendar.VEvent(event.id);
+    if (event.name) { vevent.setSummary(event.name); }
+    if (event.description) { vevent.setDescription(event.description); }
+    if (event.start_date && event.end_date) { vevent.setDate(event.start_date, event.end_date); }
+    if (event.location) { vevent.addProperty('LOCATION', event.location); }
   return vevent;
 }
 
@@ -111,4 +111,9 @@ exports.destroy = function(req,res){
   }).catch(function(err){
     handleError(res,err);
   });
+};
+
+exports.sync = function(req,res) {
+  require('./../../bin/cron/events').syncEvents();
+  return res.json({result: 'synced'});
 };
