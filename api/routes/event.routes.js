@@ -14,6 +14,10 @@ module.exports = function(app){
     eventPermissions.canView,
     eventCtrl.show
   );
+  router.get('/:id/agenda',
+    eventPermissions.canView,
+    eventCtrl.showAgenda
+  );
   router.post('/',
     eventPermissions.canCreate,
     eventCtrl.create
