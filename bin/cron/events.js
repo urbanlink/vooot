@@ -115,7 +115,7 @@ module.exports = {
       async.each(organizations, function(organization,callback) {
         // get events for the Organization
         console.log('Fetching future 12 month events for organization: ' + organization.name);
-        var queries = createMonthCalls({ori_source: organization.ori_source + '/calendar?'});
+        var queries = createMonthCalls({ori_source: organization.ori_source + '/api/calendar?'});
         async.each(queries, function(query, callback2){
           console.log(query);
           // put in timer to prevent conn refused

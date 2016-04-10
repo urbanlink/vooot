@@ -21,11 +21,11 @@ require('./api/models');
 require('./api/routes')(app);
 
 // Initiate cron
-require('./config/cron')(app);
+//require('./config/cron')(app);
 //require('./bin/db/seed');
 
 server.listen(settings.port, settings.ip, function () {
-  require('./bin/db/seed').organizations();
+//  require('./bin/db/seed').organizations();
   logger.debug('Express server listening on %d, in %s mode', settings.port, settings.environment);
 });
 
