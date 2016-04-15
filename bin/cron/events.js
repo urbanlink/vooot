@@ -13,7 +13,7 @@ function createMonthCalls(params) {
   var queries = [];
   var currentYear = moment().year();
   var currentMonth = '2'; //moment().month();
-  for (var i=0; i<12; i++){
+  for (var i=0; i<2; i++){
     currentMonth++;
     if (currentMonth>12) {
       currentMonth=1;
@@ -33,24 +33,24 @@ function updateEvents(events, cb) {
         identifier: event.identifier,
         scheme: event.identifier_scheme
       }}).then(function(result){
-        console.log('identifier found ', result);
         if (result) {
+          console.log('Identifier found: ' + result.id + '. Updating event.');
           models.Event.update(event, {where: {id: result.event_id}}).then(function(result) {
             console.log('event updated', result);
             next()
           }).catch(function(error) {
             console.log('event update error', error);
           });
-        }
-        else {
+        } else {
+          console.log('Identifier not found. Creating new event. ');
           models.Event.create(event).then(function(result){
-            console.log('event created', event);
+            console.log('event created: ' + result.id);
             models.Identifier.create({
               scheme: event.identifier_scheme,
               identifier: event.identifier,
               event_id: result.id
             }).then(function(result){
-              console.log('identifier created');
+              console.log('identifier created: ' + result.id);
               next();
             });
           }).catch(function(error){
@@ -62,29 +62,12 @@ function updateEvents(events, cb) {
       });
     } else {
       models.Event.create(event).then(function(result){
-        console.log('event created ', result);
+        console.log('event created: ' + result.id);
         next();
       }).catch(function(error){
         console.log('error creating event:', error);
       });
     }
-    // // check for identifier,
-    // models.Event.upsert(event).then(function(result) {
-    //   if (result === true){
-    //     console.log('Event updated. ');
-    //   } else {
-    //     console.log('Event created. ');
-    //   }
-    //   if (event.identifiers && event.identifiers.length>0) {
-    //     console.log(event);
-    //     models.Identifier.create({
-    //       scheme: event.identifiers[ 0].scheme,
-    //       identifier: event.identifiers[ 0].identifier,
-    //       event_id: event.id
-    //     });
-    //   }
-    //   next();
-    // });
   }, function(err) {
     if (err) { console.log(err); }
     console.log('Iterating done. ');
@@ -108,57 +91,70 @@ module.exports = {
     console.log('Cron: Syncing all future events for organizations. ');
     // Get organizations and source url for events.
     console.log('Fetching all organizations and source url for events.');
-    models.Organization.findAll().then(function(organizations) {
+
+    models.Organization.findAll({
+      include: [
+        { model: models.Identifier, as: 'identifiers' }
+      ]
+    }).then(function(organizations) {
       console.log('Found ' + organizations.length + ' organization(s)');
       if (!organizations || organizations.length<1) { return; }
 
       async.each(organizations, function(organization,callback) {
         // get events for the Organization
         console.log('Fetching future 12 month events for organization: ' + organization.name);
-        var queries = createMonthCalls({ori_source: organization.ori_source + '/api/calendar?'});
-        async.each(queries, function(query, callback2){
-          console.log(query);
-          // put in timer to prevent conn refused
-          setTimeout(function() {
-            request.get(query, function(err,response,body) {
-              if (err) {
-                console.log(err);
-                // Async call is done, alert via callback
-                callback2();
-              } else {
-                try {
-                  body = JSON.parse(body);
-                  //console.log(body);
-                  if (body.meetings && body.meetings.length>0) {
-                    for (var k=0; k<body.meetings.length; k++) {
-                      var meeting = body.meetings[ k];
-                      meeting.organization_id = organization.id;
-                      meeting.identifier_scheme = 'notubiz';
-                      meeting.identifier = meeting.id;
-                      delete meeting.id;
-                      meeting.name = meeting.description;
-                      meeting.start_date = moment(meeting.date + ' ' + meeting.time, 'DD-MM-YYYY HH:mm').format();
-                      meeting.end_date = moment(meeting.start_date).add(2, 'h').format();
-                      meeting.last_sync_date = new Date();
-                      // add the single meeting to the new meeting list.
-                      meetings.push(body.meetings[ k]);
+        var identifier;
+        if (organization.identifiers[0]) {
+          identifier = organization.identifiers[0].dataValues;
+          console.log(identifier);
+
+          var ori_source =  'http://' + identifier.identifier + '.raadsinformatie.nl';
+          var queries = createMonthCalls({ori_source: ori_source + '/api/calendar?'});
+
+          async.each(queries, function(query, callback2){
+            console.log(query);
+            // put in timer to prevent conn refused
+            setTimeout(function() {
+              request.get(query, function(err,response,body) {
+                if (err) {
+                  console.log(err);
+                  // Async call is done, alert via callback
+                  callback2();
+                } else {
+                  try {
+                    body = JSON.parse(body);
+                    //console.log(body);
+                    if (body.meetings && body.meetings.length>0) {
+                      for (var k=0; k<body.meetings.length; k++) {
+                        var meeting = body.meetings[ k];
+                        meeting.organization_id = organization.id;
+                        meeting.identifier_scheme = 'notubiz';
+                        meeting.identifier = meeting.id;
+                        delete meeting.id;
+                        meeting.name = meeting.description;
+                        meeting.start_date = moment(meeting.date + ' ' + meeting.time, 'DD-MM-YYYY HH:mm').format();
+                        meeting.end_date = moment(meeting.start_date).add(2, 'h').format();
+                        meeting.last_sync_date = new Date();
+                        // add the single meeting to the new meeting list.
+                        meetings.push(body.meetings[ k]);
+                      }
                     }
+                    // Async call is done, alert via callback
+                    callback2();
+                  } catch(e) {
+                    console.log(e);
+                    // Async call is done, alert via callback
+                    callback2();
                   }
-                  // Async call is done, alert via callback
-                  callback2();
-                } catch(e) {
-                  console.log(e);
-                  // Async call is done, alert via callback
-                  callback2();
                 }
-              }
-            });
-          }, 1000);
-        }, function(err) {
-          if (err) { console.log(err); }
-          console.log('queries done. processing events');
-          callback();
-        });
+              });
+            }, 1000);
+          }, function(err) {
+            if (err) { console.log(err); }
+            console.log('queries done. processing events');
+            callback();
+          });
+        }
       }, function(err){
         if (err) { console.log('error'); }
         console.log('done fetching meetings. ');

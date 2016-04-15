@@ -10,24 +10,38 @@ var app = express();
 // Setup logging
 require('./config/logger').logger(app);
 
+
 // Setup express
 var server = require('http').createServer(app);
+
 require('./config/express')(app);
 
-// Setup models
-require('./api/models');
 
 // Setup routes
 require('./api/routes')(app);
 
-// Initiate cron
-//require('./config/cron')(app);
-//require('./bin/db/seed');
+
+// Setup models
+var db = require('./api/models');
+
+
+if (process.env.NODE_ENV === 'development') {
+  // db.sequelize.sync({force: true}).then(function(result){
+  //   var dbseed = require('./bin/db/seed');
+  //   dbseed.organizations(function(result) {
+  //     require('./bin/cron/events').syncEvents();
+  //   });
+  // });
+}
 
 server.listen(settings.port, settings.ip, function () {
-//  require('./bin/db/seed').organizations();
   logger.debug('Express server listening on %d, in %s mode', settings.port, settings.environment);
 });
+
+// Initiate cron
+//require('./config/cron')(app);
+
+
 
 // Expose app
 module.exports = app;

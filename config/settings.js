@@ -32,5 +32,10 @@ module.exports = {
     secret      : process.env.AWS_SECRET_ACCESS_KEY || env.AWS_SECRET_ACCESS_KEY   || '',
     bucket      : process.env.AWS_S3_BUCKET_NAME    || env.AWS_S3_BUCKET_NAME      || '',
     endpoint    : process.env.AWS_S3_ENDPOINT       || env.AWS_S3_ENDPOINT         || '',
+  },
+
+  // synchronization settings. 
+  sync: {
+
   }
 };
