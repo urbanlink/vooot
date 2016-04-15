@@ -16,10 +16,10 @@ module.exports = function(sequelize, DataTypes) {
 
     former_name: DataTypes.STRING,
 
-    ori_provider: DataTypes.STRING,
-    ori_source: DataTypes.STRING,
+    // ori_provider: DataTypes.STRING,
+    // ori_source: DataTypes.STRING,
 
-    meta: DataTypes.TEXT,
+    // meta: DataTypes.TEXT,
 
   }, {
     classMethods: {
@@ -27,6 +27,10 @@ module.exports = function(sequelize, DataTypes) {
         Organization.belongsTo(Organization, {
           foreignKey: 'organization_id',
           as: 'parent'
+        });
+
+        Organization.hasMany(models.Identifier, {
+          as: 'identifiers'
         });
       }
     }

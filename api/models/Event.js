@@ -45,8 +45,22 @@ module.exports = function(sequelize, DataTypes) {
         Event.hasMany(models.Identifier, {
           as: 'identifiers'
         });
+
+        Event.hasOne(models.Agenda, {
+          as: 'agenda'
+        });
       }
     }
+  });
+
+  Event.hook('afterCreate', function(event, options) {
+    console.log(sequelize.models.Agenda);
+    console.log('model created + ' + event.id);
+    sequelize.models.Agenda.create({ event_id: event.id}).then(function(result){
+      console.log('Agenda created. ');
+    }).catch(function(error){
+      console.log(error);
+    });
   });
 
   return Event;

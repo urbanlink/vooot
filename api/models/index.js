@@ -21,12 +21,6 @@ var sequelize = new Sequelize(settings.database.database, settings.database.user
 });
 
 
-if (process.env.NODE_ENV === 'development') {
-  console.log('Syncing tables.');
-  //sequelize.sync({force: true});
-}
-
-
 var db = {};
 
 fs.readdirSync(__dirname).filter(function(file) {

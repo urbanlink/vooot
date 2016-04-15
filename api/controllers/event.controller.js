@@ -3,10 +3,14 @@
 var models = require('../models/index');
 var icalendar = require('icalendar');
 var moment = require('moment');
+var cheerio = require('cheerio');
+var request = require('request');
+var async = require('async');
+
 
 // error handler
 function handleError(res, err) {
-  console.log('Error: ', err);
+  console.log(err);
   return res.status(500).json({status:'error', msg:err});
 }
 
@@ -43,7 +47,7 @@ function toiCal(events, callback) {
 
 // Event index
 exports.index = function(req,res) {
-  console.log(req.query);
+
   var limit = req.query.limit || 10;
   if (limit > 50) { limit = 150; }
   var offset = req.query.offset || 0;
@@ -60,7 +64,6 @@ exports.index = function(req,res) {
     var end =  moment(req.query.end_date, 'DD-MM-YYYY').format();
     filter.end_date = { $lt: end};
   }
-  console.log(filter);
 
   models.Event.findAll({
     where: filter,
@@ -69,7 +72,8 @@ exports.index = function(req,res) {
     order: sort + ' ' + order,
     include: [
       { model: models.Organization, as:'organization', attributes: ['id', 'name', 'summary', 'classification'] },
-      { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] }
+      { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
+      { model: models.Agenda, as: 'agenda', attributes: ['id'] },
     ]
   }).then(function(result) {
     if (req.query.ical) {
@@ -80,9 +84,8 @@ exports.index = function(req,res) {
     } else {
       return res.json(result);
     }
-  }).catch(function(err){
-    console.log('error', err);
-    return res.json({err:err});
+  }).catch(function(err) {
+    return handleError(res,err);
   });
 
 };
@@ -92,7 +95,10 @@ exports.show = function(req,res) {
     where: { id: req.params.id },
     include: [
       { model: models.Organization, as: 'organization' },
-      { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] }
+      { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
+      { model: models.Agenda, as: 'agenda', attributes: ['id'], include: [
+        { model: models.AgendaItem, as: 'items' }
+      ]}
     ]
   }).then(function(event){
     return res.json(event);
@@ -100,8 +106,8 @@ exports.show = function(req,res) {
 };
 
 exports.create = function(req,res){
-  models.Event.create(req.body).then(function(result) {
-    return res.json(result);
+  models.Event.create(req.body).then(function(event) {
+    return res.json(event);
   }).catch(function(err) {
     handleError(res,err);
   });
@@ -127,110 +133,160 @@ exports.destroy = function(req,res){
   });
 };
 
-exports.sync = function(req,res) {
-  require('./../../bin/cron/events').syncEvents();
-  return res.json({result: 'synced'});
-};
 
+// Synchronize a single event upstream.
+exports.syncEvent = function(req,res) {
+  var eventId = req.params.id;
 
-exports.showAgenda = function(req,res) {
-  // get organization for event
   models.Event.findOne({
     where: { id: req.params.id },
     include: [
-      { model: models.Organization, as: 'organization' },
-      { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] }
+      { model: models.Organization, as: 'organization', include: [
+        { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
+      ] },
+      { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
+      { model: models.Agenda, as: 'agenda', attributes: ['id'], include: [
+        { model: models.AgendaItem, as: 'items' }
+      ] },
     ]
-  }).then(function(event){
-    if (!event) { return res.json(event); }
-    
-    // Get ori_identifier for this event.
-    var id = event.dataValues.identifiers[0].identifier || null;
-    if (!id) { return res.json(null); }
+  }).then(function(result) {
+    if (!result) { return res.json(result); }
 
-    var request = require('request');
-    var cheerio = require('cheerio');
-    var baseUrl = event.organization.ori_source;
-    var url = baseUrl + '/vergadering/' + id;
+    var event = result;
+    // Notubiz default for now;
+    var source = {
+      scheme: result.dataValues.organization.dataValues.identifiers[0].scheme,
+      identifier: result.dataValues.organization.dataValues.identifiers[0].identifier,
+      event: result.dataValues.identifiers[0].identifier,
+      url: 'http://' + result.dataValues.organization.dataValues.identifiers[0].identifier + '.raadsinformatie.nl/vergadering/' + result.dataValues.identifiers[0].identifier
+    };
 
-    request.get(url, function(err,response,body) {
-      if (err) {
-        return res.json({error: err });
-      }
+    // parse external notubiz page and handle result.
+    parseNotubizEvent(source, function(err, result) {
+      var items = result;
+      console.log('Received ' + items.length + ' agenda items');
+      //return res.json(result);
+      // Save items to database
+      async.eachSeries(items, function interatee(item, next) {
+        item.agenda_id = event.dataValues.agenda.dataValues.id;
+        var filter = {where: { identifier: item.identifier, scheme: source.scheme }};
+        console.log('filter', filter);
+        // Create or update agenda item, find by identifier
+        models.Identifier
+          .find(filter)
+          .then(function(result){
+            if (result) {
+              console.log('Identifier found: ' + result.id + '. Updating agenda item.');
+              models.AgendaItem.update(item, {where: {id: result.agenda_item_id}}).then(function(result) {
+                console.log('item updated.');
+                next();
+              }).catch(function(error) {
+                console.log('event update error', error);
+              });
+            } else {
+              console.log('Identifier not found. Creating new agenda item. ');
+              models.AgendaItem.create(item).then(function(result) {
+                console.log('Agenda item created: ' + result.id);
+                console.log(item);
+                models.Identifier.create({
+                  scheme: source.scheme,
+                  identifier: item.identifier,
+                  agenda_item_id: result.id
+                }).then(function(result){
+                  console.log('Identifier created: ' + result.id);
+                  next();
+                });
+              }).catch(function(error){
+                console.log('Error creating agenda item, ', error);
+              });
+            }
+          }).catch(function(error){
+            console.log('error creating identifier:', error);
+          });
 
-      // Throw away extra white space and non-alphanumeric characters.
-      body = body
-        .replace(/^\s+|\s+$/g, '')     // remove whitespace at beginning and end of a line
-        .replace(/\r?\n|\r|\t/g, '')   // remove tabs and newlines at beginning and end of a line
-        //.replace(/[^a-zA-Z ]/g, "")
-        //.toLowerCase();
-      ;
+      }, function(err){
 
-      var $ = cheerio.load(body);
+        return res.json({
+          s: source,
+          e: event,
+          r: result,
+          error: err
+        });
+      });
+    });
+  });
+};
 
-      var agenda_types = []; // point, heading
-      var agenda_prefixes = []; // null, count, tkn
-      var agenda_titles = []; //
-      var agenda_identifiers = []; // notubiz identifier ai_9999
-      var agenda_documents = [];
+function parseNotubizEvent(source, cb) {
+
+  request.get(source.url, function(err, response, body) {
+    if (err) { return cb(err, null); }
+
+    // Throw away extra white space and non-alphanumeric characters.
+    body = body
+      .replace(/^\s+|\s+$/g, '')     // remove whitespace at beginning and end of a line
+      .replace(/\r?\n|\r|\t/g, '')   // remove tabs and newlines at beginning and end of a line
+      //.replace(/[^a-zA-Z ]/g, "")
+      //.toLowerCase()
+    ;
+
+    // parse body
+    var $ = cheerio.load(body);
+
+    var item = {
+      type: null, // point, heading
+      prefix: null, // null, count, tkn
+      title: null, //
+      identifier: null, // notubiz identifier ai_9999
+      documents: null
+    };
+
+    var items = [];
+
+    // Get each agenda_item
+    $('#agenda ul.agenda_items li.agenda_item').each(function(i,elem) {
+      var item = {
+        type: null
+      };
 
       // Get the type of agenda_item
-      $('#agenda ul.agenda_items li.agenda_item').each(function(i,elem) {
-        if ($(this).hasClass('heading') === true) {
-          agenda_types[ i] = 'heading';
-        } else {
-          agenda_types[ i] = null;
-        }
-      });
+      if ($(this).hasClass('heading') === true) {
+        item.type = 'heading';
+      }
 
       // Get the prefixes of each agenda item
-      $('#agenda ul.agenda_items li.agenda_item h4 span.item_title .item_prefix').each(function(i,elem) {
-        agenda_prefixes[i] = $(this).text();
+      $(this).find('h4 span.item_title .item_prefix').each(function(i,elem) {
+        item.prefix = $(this).text();
         // remove the prefixes so they don't show up in the title
         $(this).empty();
       });
 
       // Get the title of each agenda item
-      $('#agenda ul.agenda_items li.agenda_item h4 span.item_title').each(function(i,elem) {
-        agenda_titles[i] = $(this).text();
+      $(this).find('h4 span.item_title').each(function(i,elem) {
+        item.title = $(this).text();
       });
 
-      // Get the title of each agenda item
-      $('#agenda ul.agenda_items li.agenda_item').each(function(i,elem) {
-        agenda_identifiers[ i] = $(this).attr('id');
-      });
+      // Get the id of each agenda item
+      item.identifier = $(this).attr('id');
 
       // Get documents for each agenda item
-      $('#agenda ul.agenda_items li.agenda_item').each(function(i,elem) {
-
-        var documents = [];
-        var documentslist = $(this).find('.agenda_item_content ul.documents li').each(function(i,elem) {
-          var doc = {
-            type: $(this).find('.document_type').text(),
-            title: $(this).find('.document_title').text(),
-            link: $(this).find('a').attr('href'),
-          };
-          var l = $(this).find('a').attr('href').split('/');
-          doc.identifier = l[ l.length -2];
-
-          documents.push(doc);
-        });
-        agenda_documents[i] = documents;
-      });
-
-      var items = [];
-      for (var i=0; i<agenda_titles.length; i++){
-        var item={
-          type: agenda_types[ i],
-          prefix: agenda_prefixes[ i],
-          title: agenda_titles[ i],
-          identifier: agenda_identifiers[ i],
-          documents: agenda_documents[ i]
+      var documents = [];
+      var documentslist = $(this).find('.agenda_item_content ul.documents li').each(function(i,elem) {
+        var doc = {
+          type: $(this).find('.document_type').text(),
+          title: $(this).find('.document_title').text(),
+          link: $(this).find('a').attr('href'),
         };
+        var l = $(this).find('a').attr('href').split('/');
+        doc.identifier = l[ l.length -2];
 
-        items.push(item);
-      }
-      res.send(items);
+        documents.push(doc);
+      });
+      item.documents = documents;
+
+      items.push(item);
     });
+
+    return cb(null, items);
   });
-};
+}
