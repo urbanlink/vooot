@@ -12,6 +12,11 @@ module.exports = function(app){
     eventCtrl.index
   );
 
+  router.get('/sync',
+    //eventPermissions.canEdit,
+    eventCtrl.syncEvents
+  );
+
   router.get('/:id',
     eventPermissions.canView,
     eventCtrl.show

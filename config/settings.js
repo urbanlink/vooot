@@ -23,6 +23,11 @@ module.exports = {
     dialect     : process.env.DATABASE_DIALECT      || env.DATABASE_DIALECT        || 'mysql'
   },
 
+  admin: {
+    name: 'Arn van der Pluijm',
+    email: 'arn@urbanlink.nl'
+  },
+  
   sendgrid : {
     key         : process.env.SENDGRID_API_KEY      || env.SENDGRID_API_KEY        || '',
   },
@@ -34,7 +39,7 @@ module.exports = {
     endpoint    : process.env.AWS_S3_ENDPOINT       || env.AWS_S3_ENDPOINT         || '',
   },
 
-  // synchronization settings. 
+  // synchronization settings.
   sync: {
 
   }

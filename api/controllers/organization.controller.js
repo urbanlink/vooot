@@ -17,7 +17,7 @@ exports.index = function(req,res) {
   var order = req.query.order || 'created_at DESC';
   var filter = {};
 
-  models.Organization.findAll({
+  models.Organization.findAndCountAll({
     where: filter,
     limit: limit,
     offset: offset,

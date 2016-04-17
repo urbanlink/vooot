@@ -8,9 +8,10 @@ var methodOverride = require('method-override');
 var errorHandler = require('errorhandler');
 var settings = require('./settings');
 var cors = require('cors');
+var logger = require('winston');
 
 
-module.exports = function(app) {  
+module.exports = function(app) {
   var env = settings.environment;
 
   app.use(compression());
@@ -18,8 +19,6 @@ module.exports = function(app) {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(methodOverride());
-  // app.use(cookieParser());
-
   app.use(cors());
 
   if ('production' === env) {

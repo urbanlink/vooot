@@ -3,10 +3,11 @@
 var models = require('../models/index');
 var settings = require('../../config/settings');
 var path = require('path');
+var logger = require('winston');
 
 // error handler
 function handleError(res, err) {
-  console.log('Error: ', err);
+  logger.debug('Error: ', err);
   return res.status(500).json({status:'error', msg:err});
 }
 
@@ -19,7 +20,7 @@ exports.index = function(req,res) {
   var order = req.query.order || 'created_at DESC';
   var filter = {};
 
-  models.File.findAll({
+  models.File.findAndCountAll({
     where: filter,
     limit: limit,
     offset: offset,
@@ -32,51 +33,58 @@ exports.index = function(req,res) {
 
 };
 
+
+// Show a single file
 exports.show = function(req,res) {
-  var fs = require('fs');
-  var PDFParser = require('pdf2json/PDFParser');
-  var pdfParser = new PDFParser();
-
-  pdfParser.on("pdfParser_dataError", function(errData) {
-   return res.json(errData);
+  models.File.findOne({
+    where: {
+      id: req.params.id
+    },
+    include: [
+      { model: models.Identifier, as:'identifiers', attributes: ['scheme','identifier'] }
+    ]
+  }).then(function(event){
+    return res.json(event);
+  }).catch(function(error) {
+    return handleError(res,error);
   });
-
-  pdfParser.on("pdfParser_dataReady", function(pdfData) {
-    res.json(pdfData);
-  });
-  
-  pdfParser.loadPDF(path.join(settings.root, 'files/2.pdf'));
-  // models.File.findOne({
-  //   where: { id: req.params.id }
-  // }).then(function(event){
-  //   return res.json(event);
-  // });
 };
 
+
+// Create a file
 exports.create = function(req,res){
   models.File.create(req.body).then(function(result) {
     return res.json(result);
   }).catch(function(err) {
-    handleError(res,err);
+    return handleError(res,err);
   });
 };
 
+
+// Update a file record
 exports.update = function(req,res){
   models.File.update(req.body, {
     where: { id: req.params.id }
   }).then(function(result){
     return res.json(result);
   }).catch(function(err){
-    handleError(res,err);
+    return handleError(res,err);
   });
 };
 
+
+// Delete a file record
 exports.destroy = function(req,res){
   models.File.destroy({
     where: { id: req.params.id }
   }).then(function(result){
     return res.json(result);
   }).catch(function(err){
-    handleError(res,err);
+    return handleError(res,err);
   });
+};
+
+
+exports.syncFile = function(req,res) {
+  return res.json('sync');
 };

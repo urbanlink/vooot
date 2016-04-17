@@ -16,11 +16,9 @@ module.exports = function(sequelize, DataTypes) {
 
     former_name: DataTypes.STRING,
 
-    // ori_provider: DataTypes.STRING,
-    // ori_source: DataTypes.STRING,
-
-    // meta: DataTypes.TEXT,
-
+    // voOot
+    last_sync_date: DataTypes.DATE
+    
   }, {
     classMethods: {
       associate: function(models) {
@@ -31,6 +29,10 @@ module.exports = function(sequelize, DataTypes) {
 
         Organization.hasMany(models.Identifier, {
           as: 'identifiers'
+        });
+
+        Organization.hasMany(models.Event, {
+          as: 'events'
         });
       }
     }

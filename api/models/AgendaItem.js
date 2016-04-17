@@ -4,6 +4,9 @@ module.exports = function(sequelize, DataTypes) {
 
   var AgendaItem = sequelize.define('AgendaItem', {
 
+    order: {
+      type: DataTypes.INTEGER
+    },
     type: {
       type: DataTypes.STRING
     },
@@ -13,8 +16,6 @@ module.exports = function(sequelize, DataTypes) {
     title: {
       type: DataTypes.STRING
     }
-    // identifier: agenda_identifiers[ i],
-    // documents: agenda_documents[ i]
 
   }, {
     classMethods: {
@@ -29,13 +30,17 @@ module.exports = function(sequelize, DataTypes) {
         AgendaItem.hasMany(models.Identifier, {
           as: 'identifiers'
         });
+
         // Can have multiple files
-        // AgendaItem.hasMany(models.File, {
-        //   as: 'items'
-        // });
+        AgendaItem.belongsToMany(models.File, {
+          through: 'file_agendaitem',
+          foreignKey: 'agendaitem_id',
+          otherKey: 'file_id',
+          as: 'files'
+        });
       }
     }
   });
-
+  
   return AgendaItem;
 };

@@ -1,3 +1,5 @@
+/* globals require, process, module */
+
 'use strict';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -24,14 +26,13 @@ require('./api/routes')(app);
 // Setup models
 var db = require('./api/models');
 
-
-if (process.env.NODE_ENV === 'development') {
-  // db.sequelize.sync({force: true}).then(function(result){
-  //   var dbseed = require('./bin/db/seed');
-  //   dbseed.organizations(function(result) {
-  //     require('./bin/cron/events').syncEvents();
-  //   });
-  // });
+if (process.env.SYNCDB === 'true') {
+  db.sequelize.sync({force: true}).then(function(result){
+    var dbseed = require('./bin/db/seed');
+    dbseed.organizations(function(result) {
+      require('./bin/cron/events').syncEvents();
+    });
+  });
 }
 
 server.listen(settings.port, settings.ip, function () {

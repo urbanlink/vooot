@@ -14,6 +14,7 @@
     "icalendar": "^0.7.1",
     "method-override": "^2.3.5",
     "moment": "^2.12.0",
+    "morgan": "^1.7.0",
     "mysql": "^2.10.2",
     "node-schedule": "^1.1.0",
     "pdf2json": "^1.1.5",

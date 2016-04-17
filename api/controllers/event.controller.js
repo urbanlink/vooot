@@ -1,12 +1,15 @@
 'use strict';
 
-var models = require('../models/index');
+var models    = require('../models/index');
 var icalendar = require('icalendar');
-var moment = require('moment');
-var cheerio = require('cheerio');
-var request = require('request');
-var async = require('async');
+var moment    = require('moment');
+var cheerio   = require('cheerio');
+var request   = require('request');
+var async     = require('async');
+var logger = require('winston');
 
+// custom notubiz parser
+var notubiz = require('./../modules/notubiz');
 
 // error handler
 function handleError(res, err) {
@@ -48,9 +51,10 @@ function toiCal(events, callback) {
 // Event index
 exports.index = function(req,res) {
 
-  var limit = req.query.limit || 10;
+  console.log(req.query);
+  var limit = parseInt(req.query.limit) || 10;
   if (limit > 50) { limit = 150; }
-  var offset = req.query.offset || 0;
+  var offset = parseInt(req.query.offset) || 0;
   var sort = req.query.sort || 'start_date';
   var order = req.query.order || 'ASC';
   var filter = {};
@@ -65,7 +69,7 @@ exports.index = function(req,res) {
     filter.end_date = { $lt: end};
   }
 
-  models.Event.findAll({
+  models.Event.findAndCountAll({
     where: filter,
     limit: limit,
     offset: offset,
@@ -91,13 +95,16 @@ exports.index = function(req,res) {
 };
 
 exports.show = function(req,res) {
+  logger.debug('Show event ' + req.params.id);
   models.Event.findOne({
     where: { id: req.params.id },
     include: [
       { model: models.Organization, as: 'organization' },
       { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
       { model: models.Agenda, as: 'agenda', attributes: ['id'], include: [
-        { model: models.AgendaItem, as: 'items' }
+        { model: models.AgendaItem, as: 'items', include: [
+          { model: models.File, as: 'files' }
+        ]}
       ]}
     ]
   }).then(function(event){
@@ -134,10 +141,90 @@ exports.destroy = function(req,res){
 };
 
 
+// Sync a calendar, without agenda
+exports.syncEvents = function(req,res) {
+
+  var organization_id = req.query.organization_id;
+  var start_date = moment(req.query.start_date, 'DD-MM-YYYY');
+
+  if (!organization_id || !start_date) {
+    return res.json({status: 'error', msg: 'missing parameter organization_id or start_date. '});
+  }
+
+  // get orgnization information
+  models.Organization.findOne({
+    where: { id: organization_id },
+    include: [
+      { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
+      { model: models.Event, as: 'events', limit:10 }
+    ]
+  }).then(function(organization) {
+    if (!organization) { return res.json('Organization not found. '); }
+    // Check if last sync date is less than current timestamp
+    var difference = moment().diff(moment(organization.dataValues.last_sync_date), 'seconds');
+    if (difference < 60) {
+      return res.json({
+        status: 'Too many requests, please wait ' + (60 - difference) + ' seconds. ',
+        difference: difference
+      });
+    }
+
+    var ori_source, identifier = organization.identifiers[0].dataValues;
+
+    if (identifier.scheme === 'notubiz') {
+      ori_source = 'http://' + identifier.identifier + '.raadsinformatie.nl';
+    }
+
+    var month = start_date.month();
+    var year = start_date.year();
+    var meetings = [];
+    ori_source = ori_source + '/api/calendar/?month=' + (month +1) + '&year=' + year;
+
+    request.get(ori_source, function(err,response,body) {
+      if (err) { return handleError(res,err); }
+      try {
+        body = JSON.parse(body);
+        if (body.meetings && body.meetings.length>0) {
+          for (var k=0; k<body.meetings.length; k++) {
+            var meeting = body.meetings[ k];
+            meeting.organization_id = organization.id;
+            meeting.identifier_scheme = 'notubiz';
+            meeting.identifier = meeting.id;
+            delete meeting.id;
+            meeting.name = meeting.description;
+            meeting.start_date = moment(meeting.date + ' ' + meeting.time, 'DD-MM-YYYY HH:mm').format();
+            meeting.end_date = moment(meeting.start_date).add(2, 'h').format();
+            meeting.last_sync_date = new Date();
+            // add the single meeting to the new meeting list.
+            meetings.push(body.meetings[ k]);
+          }
+        }
+        // update or create each meeting synchronous.
+        upsertEvents(meetings, function(result) {
+          return res.json(result);
+          organization.updateAttributes({last_sync_date: new Date() }).then(function(result){
+
+          }).catch(function(error){
+            return handleError(res,err);
+          });
+          return res.json({status: 'ok', statusMessage: 'Updated ' + meetings.length + ' meetings. '});
+        })
+      } catch(e) {
+        console.log(e);
+        // Async call is done, alert via callback
+        //callback2();
+      }
+    });
+  }).catch(function(error) {
+    return res.json(error);
+  });
+};
+
+
 // Synchronize a single event upstream.
 exports.syncEvent = function(req,res) {
   var eventId = req.params.id;
-
+  // Fetch the event based on event-id
   models.Event.findOne({
     where: { id: req.params.id },
     include: [
@@ -150,143 +237,217 @@ exports.syncEvent = function(req,res) {
       ] },
     ]
   }).then(function(result) {
-    if (!result) { return res.json(result); }
-
     var event = result;
-    // Notubiz default for now;
-    var source = {
-      scheme: result.dataValues.organization.dataValues.identifiers[0].scheme,
-      identifier: result.dataValues.organization.dataValues.identifiers[0].identifier,
-      event: result.dataValues.identifiers[0].identifier,
-      url: 'http://' + result.dataValues.organization.dataValues.identifiers[0].identifier + '.raadsinformatie.nl/vergadering/' + result.dataValues.identifiers[0].identifier
-    };
+    if (!event) { return res.json(event); }
 
-    // parse external notubiz page and handle result.
-    parseNotubizEvent(source, function(err, result) {
-      var items = result;
-      console.log('Received ' + items.length + ' agenda items');
-      //return res.json(result);
-      // Save items to database
+    // Check if last sync date is less than current timestamp
+    var lastSync = moment(event.dataValues.last_sync_date);
+    var difference = moment().diff(lastSync, 'seconds');
+    if (difference < 60) {
+      return res.json({
+        status: 'Too many requests, please wait ' + (60 - difference) + ' seconds. ',
+        difference: difference
+      });
+    }
+
+    var scheme = event.dataValues.organization.dataValues.identifiers[0].scheme;
+    if (scheme!=='notubiz') {
+      return res.json({status:'error', msg: 'Only notubiz is available, not ' + scheme });
+    }
+
+    logger.log('Parsing ' + scheme + ' event.');
+    notubiz.parseEvent({
+      organization_identifier: event.dataValues.organization.dataValues.identifiers[0].identifier,
+      event_identifier: event.dataValues.identifiers[0].identifier
+    }, function(err,result) {
+      if (err) { return res.json(err); }
+
+      var items = result || {};
+      logger.debug('Received ' + items.length + ' agenda items for ' + scheme);
+
+      // Save each agenda-item to the database
+      logger.debug('Upserting all agenda items. ');
       async.eachSeries(items, function interatee(item, next) {
+        // Add a reference to the right agenda to the agenda-item.
         item.agenda_id = event.dataValues.agenda.dataValues.id;
-        var filter = {where: { identifier: item.identifier, scheme: source.scheme }};
-        console.log('filter', filter);
-        // Create or update agenda item, find by identifier
-        models.Identifier
-          .find(filter)
-          .then(function(result){
-            if (result) {
-              console.log('Identifier found: ' + result.id + '. Updating agenda item.');
-              models.AgendaItem.update(item, {where: {id: result.agenda_item_id}}).then(function(result) {
-                console.log('item updated.');
-                next();
-              }).catch(function(error) {
-                console.log('event update error', error);
-              });
-            } else {
-              console.log('Identifier not found. Creating new agenda item. ');
-              models.AgendaItem.create(item).then(function(result) {
-                console.log('Agenda item created: ' + result.id);
-                console.log(item);
-                models.Identifier.create({
-                  scheme: source.scheme,
-                  identifier: item.identifier,
-                  agenda_item_id: result.id
-                }).then(function(result){
-                  console.log('Identifier created: ' + result.id);
-                  next();
-                });
-              }).catch(function(error){
-                console.log('Error creating agenda item, ', error);
-              });
-            }
-          }).catch(function(error){
-            console.log('error creating identifier:', error);
+        item.identifier_scheme = scheme;
+
+        // Upsert the agenda-item based on the identifier.
+        logger.debug('Upserting agenda-item.');
+        upsertAgendaitemByIdentifier(item, function(error, result) {
+          if (error) { return handleError(res,error); }
+
+          var agendaItemId = result.id;
+
+          // Process the documents for this agenda-item
+          logger.debug('Upserting all documents for this agenda-item. ');
+          async.eachSeries(item.documents, function iteratee(doc, nextDoc) {
+            doc.agendaitem_id = agendaItemId;
+            doc.identifier_scheme = scheme;
+            upsertDocumentByIdentifier(doc, function(error, result) {
+              if (error) { return handleError(res,error); }
+              logger.debug('Document saved: ' + result.id);
+              nextDoc();
+            });
+          }, function(err){
+            // all docs processed.
+            logger.debug('All docs for this agenda-item are processed. ');
+            next();
           });
-
-      }, function(err){
-
-        return res.json({
-          s: source,
-          e: event,
-          r: result,
-          error: err
+        });
+      }, function(err) {
+        // All items for the event are updated, update the event sync date
+        logger.debug('All agende-items are saved. Updating event sync date. ');
+        event.updateAttributes({ last_sync_date: new Date() }).then(function(result) {
+          logger.debug('Done synchronizing');
+          return res.json({
+            status: 'Event synchronized',
+            result: result,
+            error: err
+          });
+        }).catch(function(error) {
+          return handleError(res,error);
         });
       });
     });
   });
 };
 
-function parseNotubizEvent(source, cb) {
 
-  request.get(source.url, function(err, response, body) {
-    if (err) { return cb(err, null); }
 
-    // Throw away extra white space and non-alphanumeric characters.
-    body = body
-      .replace(/^\s+|\s+$/g, '')     // remove whitespace at beginning and end of a line
-      .replace(/\r?\n|\r|\t/g, '')   // remove tabs and newlines at beginning and end of a line
-      //.replace(/[^a-zA-Z ]/g, "")
-      //.toLowerCase()
-    ;
-
-    // parse body
-    var $ = cheerio.load(body);
-
-    var item = {
-      type: null, // point, heading
-      prefix: null, // null, count, tkn
-      title: null, //
-      identifier: null, // notubiz identifier ai_9999
-      documents: null
-    };
-
-    var items = [];
-
-    // Get each agenda_item
-    $('#agenda ul.agenda_items li.agenda_item').each(function(i,elem) {
-      var item = {
-        type: null
-      };
-
-      // Get the type of agenda_item
-      if ($(this).hasClass('heading') === true) {
-        item.type = 'heading';
+// update or create an agenda-item and identifier
+function upsertAgendaitemByIdentifier(item, cb) {
+  models.Identifier
+    .find({ where: { identifier: item.identifier } })
+    .then(function(result){
+      if (result) {
+        var agenda_item_id = result.agenda_item_id;
+        models.AgendaItem.update(item, { where: { id: agenda_item_id } }).then(function(result) {
+          cb(null, { id: agenda_item_id });
+        }).catch(function(error) {
+          logger.error('Event update error ', error);
+          cb(error);
+        });
+      } else {
+        // Create a new agenda item.
+        models.AgendaItem.create(item).then(function(result) {
+          // Add the identifier to the agenda item.
+          var identifier = {
+            scheme: item.identifier_scheme,
+            identifier: item.identifier,
+            agenda_item_id: result.id
+          };
+          models.Identifier.create(identifier).then(function(result) {
+            cb(null, { id: identifier.agenda_item_id});
+          });
+        }).catch(function(error){
+          logger.error('Error creating agenda item, ', error);
+          cb(error);
+        });
       }
-
-      // Get the prefixes of each agenda item
-      $(this).find('h4 span.item_title .item_prefix').each(function(i,elem) {
-        item.prefix = $(this).text();
-        // remove the prefixes so they don't show up in the title
-        $(this).empty();
-      });
-
-      // Get the title of each agenda item
-      $(this).find('h4 span.item_title').each(function(i,elem) {
-        item.title = $(this).text();
-      });
-
-      // Get the id of each agenda item
-      item.identifier = $(this).attr('id');
-
-      // Get documents for each agenda item
-      var documents = [];
-      var documentslist = $(this).find('.agenda_item_content ul.documents li').each(function(i,elem) {
-        var doc = {
-          type: $(this).find('.document_type').text(),
-          title: $(this).find('.document_title').text(),
-          link: $(this).find('a').attr('href'),
-        };
-        var l = $(this).find('a').attr('href').split('/');
-        doc.identifier = l[ l.length -2];
-
-        documents.push(doc);
-      });
-      item.documents = documents;
-
-      items.push(item);
+    }).catch(function(error){
+      logger.error('Error finding identifier:', error);
+      cb(error);
     });
+}
 
-    return cb(null, items);
+function upsertDocumentByIdentifier(doc, cb) {
+  // get the document based on the provided identifier
+  var documentIdentifier = doc.identifier;
+  var agendaItemId = doc.agendaitem_id;
+
+  // Try to find the identifier.
+  models.Identifier.find({ where: { identifier: documentIdentifier } }).then(function(result) {
+    if (result) {
+      var fileId= result.file_id;
+      models.File.update(doc, { where: { id: fileId } }).then(function(result) {
+        cb(null, {id: fileId});
+      }).catch(function(error){
+        logger.error('File update error ', error);
+        cb(error);
+      });
+    } else {
+      // create the new file record
+      models.File.create(doc).then(function(file) {
+        var identifier = {
+          scheme: doc.identifier_scheme,
+          identifier: doc.identifier,
+          file_id: file.id
+        };
+        // Create the identifier for this record
+        models.Identifier.create(identifier).then(function(identifier) {
+
+          // Add the file to the agenda-item
+          models.AgendaItem.findById(agendaItemId).then(function(agendaItem){
+            console.log(agendaItem);
+            agendaItem.addFile(file).then(function(result) {
+              cb(null, { id: file.id });
+            }).catch(function(error) {
+              console.log('ee',error);
+            });
+          }).catch(function(error) {
+            console.log('eee',error);
+          });
+        });
+      }).catch(function(error) {
+        logger.error('Error creating file item, ', error);
+        cb(error);
+      });
+    }
+  }).catch(function(error){
+    logger.error('Error finding identifier: ', error);
+    cb(error);
+  });
+}
+
+// Create an event or update an existing event, based on an identifier.
+function upsertEvents(events, cb) {
+  logger.debug('Updating or inserting ' + events.length + ' events.');
+  async.eachSeries(events, function interatee(event, next){
+    // if identifier, update related event.
+    if (event.identifier) {
+      models.Identifier.find({where: {
+        identifier: event.identifier,
+        scheme: event.identifier_scheme
+      }}).then(function(result){
+        if (result) {
+          logger.debug('Identifier found: ' + result.id + '. Updating event.');
+          models.Event.update(event, {where: {id: result.event_id}}).then(function(result) {
+            logger.debug('Event updated.');
+            next();
+          }).catch(function(error) {
+            logger.error('Event update error', error);
+          });
+        } else {
+          logger.debug('Identifier not found. Creating new event. ');
+          models.Event.create(event).then(function(result){
+            logger.debug('Event created: ' + result.id);
+            models.Identifier.create({
+              scheme: event.identifier_scheme,
+              identifier: event.identifier,
+              event_id: result.id
+            }).then(function(result){
+              logger.debug('Identifier created: ' + result.id);
+              next();
+            });
+          }).catch(function(error){
+            logger.error('Error creating event, ', error);
+          });
+        }
+      }).catch(function(error){
+        logger.error('Error creating identifier:', error);
+      });
+    } else {
+      models.Event.create(event).then(function(result){
+        logger.debug('Event created: ' + result.id);
+        next();
+      }).catch(function(error){
+        logger.debug('Error creating event:', error);
+      });
+    }
+  }, function(err) {
+    if (err) { logger.error(err); }
+    logger.debug('Iterating done. ');
+    cb();
   });
 }

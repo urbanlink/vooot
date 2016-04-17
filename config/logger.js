@@ -66,8 +66,8 @@ winston.add(winston.transports.Console, {
 });
 // Send errors by email to the admin
 winston.add(winston.transports.SendGridLogger, {
-  to: 'admin@columby.com',
-  subject: 'Columby API error message',
+  to: 'info@urbanlink.nl',
+  subject: 'Error message',
   level: 'error'
 });
 
