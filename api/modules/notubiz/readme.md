@@ -1,6 +1,0 @@
-# Notubiz parser
-
-
-## parseCalendar
-
-## parseEvent

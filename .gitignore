@@ -117,3 +117,4 @@ nbproject
 .idea
 .node_history
 .vagrant
+pm2.json

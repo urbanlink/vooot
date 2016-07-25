@@ -1,3 +1,4 @@
 {
-  "camelcase": false
+  "camelcase": false,
+  "node": true
 }

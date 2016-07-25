@@ -23,11 +23,16 @@ module.exports = {
     dialect     : process.env.DATABASE_DIALECT      || env.DATABASE_DIALECT        || 'mysql'
   },
 
+  jwt : {
+    secret      : process.env.JWT_SECRET            || env.JWT_SECRET               || '12345',
+    root        : process.env.JWT_ROOT              || env.JWT_ROOT                 || 'https://auth0.com'
+  },
+
   admin: {
     name: 'Arn van der Pluijm',
     email: 'arn@urbanlink.nl'
   },
-  
+
   sendgrid : {
     key         : process.env.SENDGRID_API_KEY      || env.SENDGRID_API_KEY        || '',
   },

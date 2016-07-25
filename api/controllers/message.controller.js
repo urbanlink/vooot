@@ -14,35 +14,37 @@ function handleError(res, err) {
 
 // File index
 exports.index = function(req,res) {
+  logger.debug('[Message Controller] - Index');
+
   var limit = req.query.limit || 10;
   if (limit > 50) { limit = 50; }
   var offset = req.query.offset || 0;
   var order = req.query.order || 'created_at DESC';
   var filter = {};
+  if (req.query.person_id) { filter.person_id = req.query.person_id; }
 
-  models.file.findAndCountAll({
+  models.message.findAndCountAll({
     where: filter,
     limit: limit,
     offset: offset,
-    order: order
+    order: order,
+    include: [{
+      model: models.account, as:'sender'
+    }]
   }).then(function(result) {
     return res.json(result);
-  }).catch(function(err){
-    return res.json({err:err});
+  }).catch(function(error) {
+    return handleError(res, error);
   });
-
 };
 
 
 // Show a single file
 exports.show = function(req,res) {
-  models.file.findOne({
+  models.message.findOne({
     where: {
       id: req.params.id
-    },
-    include: [
-      { model: models.identifier, as:'identifiers', attributes: ['scheme','identifier'] }
-    ]
+    }
   }).then(function(event){
     return res.json(event);
   }).catch(function(error) {
@@ -53,7 +55,7 @@ exports.show = function(req,res) {
 
 // Create a file
 exports.create = function(req,res){
-  models.file.create(req.body).then(function(result) {
+  models.message.create(req.body).then(function(result) {
     return res.json(result);
   }).catch(function(err) {
     return handleError(res,err);
@@ -62,10 +64,12 @@ exports.create = function(req,res){
 
 
 // Update a file record
-exports.update = function(req,res){
-  models.file.update(req.body, {
+exports.update = function(req,res) {
+  console.log('Updating message ' + req.params.id);
+  models.message.update(req.body, {
     where: { id: req.params.id }
-  }).then(function(result){
+  }).then(function(result) {
+    console.log('done');
     return res.json(result);
   }).catch(function(err){
     return handleError(res,err);
@@ -75,16 +79,11 @@ exports.update = function(req,res){
 
 // Delete a file record
 exports.destroy = function(req,res){
-  models.file.destroy({
+  models.message.destroy({
     where: { id: req.params.id }
   }).then(function(result){
     return res.json(result);
   }).catch(function(err){
     return handleError(res,err);
   });
-};
-
-
-exports.syncFile = function(req,res) {
-  return res.json('sync');
 };

@@ -21,12 +21,12 @@ exports.index = function(req,res) {
 
   // Query based on voOot-event-id:
   if (req.query.event_id) {
-    models.Agenda.find({
+    models.agenda.find({
       where: {
         event_id: req.query.event_id
       },
       include: [
-        { model: models.AgendaItems, as: 'items' }
+        { model: models.agendaItems, as: 'items' }
       ]
     }).then(function(result){
       return res.json(result);
@@ -42,12 +42,12 @@ exports.index = function(req,res) {
 exports.show = function(req,res) {
 
   // get agenda based on voOot-agenda-id;
-  models.Agenda.find({
+  models.agenda.find({
     where: {
       id: req.params.id
     },
     include: [
-      { model: models.agendaItems, as: 'items' }
+      { model: models.agendaitems, as: 'items' }
     ]
   }).then(function(result){
     return res.json(result);
@@ -71,13 +71,13 @@ exports.destroy = function(req,res) {
 exports.sync = function(req,res) {
 
     // get event-identifier for agenda
-    models.Agenda.findOne({
+    models.agenda.findOne({
       where: { id: req.params.id },
       include: [
-        { model: models.Event,
+        { model: models.event,
           as: 'event',
           include: [
-            { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] }
+            { model: models.identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] }
           ]
         },
       ]

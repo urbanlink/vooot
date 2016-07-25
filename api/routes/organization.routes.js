@@ -2,29 +2,57 @@
 
 var express = require('express');
 var router = express.Router();
-var organizationCtrl = require('../controllers/organization.controller');
-var organizationPermissions = require('../permissions/organization.permissions');
+var controller = require('../controllers/organization.controller');
+var permissions = require('../permissions/organization.permissions');
 
-module.exports = function(app){
+
+module.exports = function(app) {
+
   router.get('/',
-    organizationPermissions.canView,
-    organizationCtrl.index
+    permissions.canView,
+    controller.index
+  );
+  router.get('/query',
+    permissions.canView,
+    controller.query
   );
   router.get('/:id',
-    organizationPermissions.canView,
-    organizationCtrl.show
+    permissions.canView,
+    controller.show
   );
   router.post('/',
-    organizationPermissions.canCreate,
-    organizationCtrl.create
+    permissions.canCreate,
+    controller.create
   );
   router.put('/:id',
-    organizationPermissions.canUpdate,
-    organizationCtrl.update
+    permissions.canUpdate,
+    controller.update
   );
   router.delete('/:id',
-    organizationPermissions.canDelete,
-    organizationCtrl.destroy
+    permissions.canDelete,
+    controller.destroy
+  );
+
+  router.post('/:id/editor',
+    permissions.canUpdate,
+    controller.addEditor
+  );
+  router.post('/:id/image',
+    permissions.canUpdate,
+    controller.addImage
+  );
+  router.post('/:id/person',
+    permissions.canUpdate,
+    controller.addPerson
+  );
+
+  router.delete('/:id/editor',
+    permissions.canUpdate,
+    controller.deleteEditor
+  );
+  router.delete('/:id/person',
+    permissions.canUpdate,
+    controller.deletePerson
   );
 
 

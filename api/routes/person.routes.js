@@ -2,8 +2,8 @@
 
 var express = require('express');
 var router = express.Router();
-var controller = require('../controllers/event.controller');
-var permission = require('../permissions/event.permissions');
+var controller = require('../controllers/person.controller');
+var permission = require('../permissions/person.permissions');
 
 module.exports = function(app){
 
@@ -12,9 +12,9 @@ module.exports = function(app){
     controller.index
   );
 
-  router.get('/sync',
-    //permission.canEdit,
-    controller.syncEvents
+  router.get('/query',
+    permission.canView,
+    controller.query
   );
 
   router.get('/:id',
@@ -22,28 +22,20 @@ module.exports = function(app){
     controller.show
   );
 
-  router.get('/:id/sync',
-    //permission.canEdit,
-    controller.syncEvent
-  );
-
-  router.post('/:id/follow',
+  router.post('/follow',
     permission.canUpdate,
     controller.follow
   );
-  router.post('/:id/unfollow',
+
+  router.post('/unfollow',
     permission.canUpdate,
     controller.unfollow
   );
 
-  // router.post('/:id/identifier',
-  //   permission.canUpdate,
-  //   controller.addIdentifier
-  // );
-  // router.delete('/:id/identifier',
-  //   permission.canUpdate,
-  //   controller.removeIdentifier
-  // );
+  router.post('/:id/editor',
+    permission.canUpdate,
+    controller.addEditor
+  );
 
   router.post('/',
     permission.canCreate,
@@ -54,11 +46,19 @@ module.exports = function(app){
     permission.canUpdate,
     controller.update
   );
-
   router.delete('/:id',
     permission.canDelete,
     controller.destroy
   );
 
-  app.use('/event', router);
+  router.post('/:id/identifier',
+    permission.canUpdate,
+    controller.addIdentifier
+  );
+  router.delete('/:id/identifier',
+    permission.canUpdate,
+    controller.removeIdentifier
+  );
+
+  app.use('/person', router);
 };

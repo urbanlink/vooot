@@ -9,7 +9,7 @@ var async     = require('async');
 var logger = require('winston');
 
 // custom notubiz parser
-var notubiz = require('./../modules/notubiz');
+var notubiz = require('./../../extractors/notubiz/');
 
 // error handler
 function handleError(res, err) {
@@ -52,8 +52,9 @@ function toiCal(events, callback) {
 exports.index = function(req,res) {
 
   console.log(req.query);
-  var limit = parseInt(req.query.limit) || 10;
-  if (limit > 50) { limit = 150; }
+
+  var limit = parseInt(req.query.limit) || 100;
+  if (limit > 100) { limit = 100; }
   var offset = parseInt(req.query.offset) || 0;
   var sort = req.query.sort || 'start_date';
   var order = req.query.order || 'ASC';
@@ -69,43 +70,54 @@ exports.index = function(req,res) {
     filter.end_date = { $lt: end};
   }
 
-  models.Event.findAndCountAll({
-    where: filter,
-    limit: limit,
-    offset: offset,
-    order: sort + ' ' + order,
-    include: [
-      { model: models.Organization, as:'organization', attributes: ['id', 'name', 'summary', 'classification'] },
-      { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
-      { model: models.Agenda, as: 'agenda', attributes: ['id'] },
-    ]
-  }).then(function(result) {
-    if (req.query.ical) {
-      toiCal(result, function(err,result){
-        res.set('Content-Type', 'text/calendar');
-        return res.send(result.toString());
+  // Get user's events if needed
+  if (req.query.account_id) {
+    models.account.findOne({ where: { id: req.query.account_id}}).then(function(account){
+      account.getEvents().then(function(events){
+        console.log(events);
+        return res.json({rows: events});
       });
-    } else {
-      return res.json(result);
-    }
-  }).catch(function(err) {
-    return handleError(res,err);
-  });
+    });
+  } else {
 
+    models.event.findAndCountAll({
+      where: filter,
+      limit: limit,
+      offset: offset,
+      order: sort + ' ' + order,
+      include: [
+        { model: models.organization, as:'organization', attributes: ['id', 'name', 'summary', 'classification'] },
+        { model: models.identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
+        { model: models.agenda, as: 'agenda', attributes: ['id'] },
+      ]
+    }).then(function(result) {
+      if (req.query.ical) {
+        toiCal(result, function(err,result){
+          res.set('Content-Type', 'text/calendar');
+          return res.send(result.toString());
+        });
+      } else {
+        return res.json(result);
+      }
+    }).catch(function(err) {
+      return handleError(res,err);
+    });
+  }
 };
 
 exports.show = function(req,res) {
   logger.debug('Show event ' + req.params.id);
-  models.Event.findOne({
+  models.event.findOne({
     where: { id: req.params.id },
     include: [
-      { model: models.Organization, as: 'organization' },
-      { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
-      { model: models.Agenda, as: 'agenda', attributes: ['id'], include: [
-        { model: models.AgendaItem, as: 'items', include: [
-          { model: models.File, as: 'files' }
+      { model: models.organization, as: 'organization' },
+      { model: models.identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
+      { model: models.agenda, as: 'agenda', attributes: ['id'], include: [
+        { model: models.agendaitem, as: 'items', include: [
+          { model: models.file, as: 'files' }
         ]}
-      ]}
+      ]},
+      { model: models.account, as: 'followers' }
     ]
   }).then(function(event){
     return res.json(event);
@@ -113,7 +125,7 @@ exports.show = function(req,res) {
 };
 
 exports.create = function(req,res){
-  models.Event.create(req.body).then(function(event) {
+  models.event.create(req.body).then(function(event) {
     return res.json(event);
   }).catch(function(err) {
     handleError(res,err);
@@ -121,7 +133,7 @@ exports.create = function(req,res){
 };
 
 exports.update = function(req,res){
-  models.Event.update(req.body, {
+  models.event.update(req.body, {
     where: { id: req.params.id }
   }).then(function(result){
     return res.json(result);
@@ -131,7 +143,7 @@ exports.update = function(req,res){
 };
 
 exports.destroy = function(req,res){
-  models.Event.destroy({
+  models.event.destroy({
     where: { id: req.params.id }
   }).then(function(result){
     return res.json(result);
@@ -139,6 +151,50 @@ exports.destroy = function(req,res){
     handleError(res,err);
   });
 };
+
+
+exports.follow = function(req,res) {
+  // First find the person
+  models.event.findById(req.params.id).then(function(event) {
+    // then find the account
+    models.account.findById(req.body.account_id).then(function(account) {
+      if (account){
+        event.addFollower(account).then(function(result){
+          return res.json(true);
+        }).catch(function(error){
+          return handleError(res,error);
+        });
+      } else {
+        return handleError(res,'Account not found');
+      }
+    });
+  }).catch(function(error) {
+    return handleError(error);
+  });
+};
+
+exports.unfollow = function(req,res) {
+  // first find the person
+  models.event.findById(req.params.id).then(function(event) {
+    if (event) {
+      // then find the account
+      models.account.findById(req.body.account_id).then(function(account) {
+        if (account){
+          event.removeFollower(account).then(function(result){
+            return res.json(result);
+          }).catch(function(error){
+            return handleError(res, error);
+          });
+        } else {
+          return handleError(res,'Account not found');
+        }
+      });
+    }
+  }).catch(function(error) {
+    return handleError(error);
+  });
+};
+
 
 
 // Sync a calendar, without agenda
@@ -152,11 +208,11 @@ exports.syncEvents = function(req,res) {
   }
 
   // get orgnization information
-  models.Organization.findOne({
+  models.organization.findOne({
     where: { id: organization_id },
     include: [
-      { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
-      { model: models.Event, as: 'events', limit:10 }
+      { model: models.identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
+      { model: models.event, as: 'events', limit:10 }
     ]
   }).then(function(organization) {
     if (!organization) { return res.json('Organization not found. '); }
@@ -221,19 +277,21 @@ exports.syncEvents = function(req,res) {
 };
 
 
+
+
 // Synchronize a single event upstream.
 exports.syncEvent = function(req,res) {
   var eventId = req.params.id;
   // Fetch the event based on event-id
-  models.Event.findOne({
+  models.event.findOne({
     where: { id: req.params.id },
     include: [
-      { model: models.Organization, as: 'organization', include: [
-        { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
+      { model: models.organization, as: 'organization', include: [
+        { model: models.identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
       ] },
-      { model: models.Identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
-      { model: models.Agenda, as: 'agenda', attributes: ['id'], include: [
-        { model: models.AgendaItem, as: 'items' }
+      { model: models.identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] },
+      { model: models.agenda, as: 'agenda', attributes: ['id'], include: [
+        { model: models.agendaitem, as: 'items' }
       ] },
     ]
   }).then(function(result) {
@@ -317,12 +375,12 @@ exports.syncEvent = function(req,res) {
 
 // update or create an agenda-item and identifier
 function upsertAgendaitemByIdentifier(item, cb) {
-  models.Identifier
+  models.identifier
     .find({ where: { identifier: item.identifier } })
     .then(function(result){
       if (result) {
         var agenda_item_id = result.agenda_item_id;
-        models.AgendaItem.update(item, { where: { id: agenda_item_id } }).then(function(result) {
+        models.agendaitem.update(item, { where: { id: agenda_item_id } }).then(function(result) {
           cb(null, { id: agenda_item_id });
         }).catch(function(error) {
           logger.error('Event update error ', error);
@@ -330,14 +388,14 @@ function upsertAgendaitemByIdentifier(item, cb) {
         });
       } else {
         // Create a new agenda item.
-        models.AgendaItem.create(item).then(function(result) {
+        models.agendaitem.create(item).then(function(result) {
           // Add the identifier to the agenda item.
           var identifier = {
             scheme: item.identifier_scheme,
             identifier: item.identifier,
             agenda_item_id: result.id
           };
-          models.Identifier.create(identifier).then(function(result) {
+          models.identifier.create(identifier).then(function(result) {
             cb(null, { id: identifier.agenda_item_id});
           });
         }).catch(function(error){
@@ -357,10 +415,10 @@ function upsertDocumentByIdentifier(doc, cb) {
   var agendaItemId = doc.agendaitem_id;
 
   // Try to find the identifier.
-  models.Identifier.find({ where: { identifier: documentIdentifier } }).then(function(result) {
+  models.identifier.find({ where: { identifier: documentIdentifier } }).then(function(result) {
     if (result) {
       var fileId= result.file_id;
-      models.File.update(doc, { where: { id: fileId } }).then(function(result) {
+      models.file.update(doc, { where: { id: fileId } }).then(function(result) {
         cb(null, {id: fileId});
       }).catch(function(error){
         logger.error('File update error ', error);
@@ -368,19 +426,19 @@ function upsertDocumentByIdentifier(doc, cb) {
       });
     } else {
       // create the new file record
-      models.File.create(doc).then(function(file) {
+      models.file.create(doc).then(function(file) {
         var identifier = {
           scheme: doc.identifier_scheme,
           identifier: doc.identifier,
           file_id: file.id
         };
         // Create the identifier for this record
-        models.Identifier.create(identifier).then(function(identifier) {
+        models.identifier.create(identifier).then(function(identifier) {
 
           // Add the file to the agenda-item
-          models.AgendaItem.findById(agendaItemId).then(function(agendaItem){
+          models.agendaItem.findById(agendaItemId).then(function(agendaItem){
             console.log(agendaItem);
-            agendaItem.addFile(file).then(function(result) {
+            agendaitem.addFile(file).then(function(result) {
               cb(null, { id: file.id });
             }).catch(function(error) {
               console.log('ee',error);
@@ -406,13 +464,13 @@ function upsertEvents(events, cb) {
   async.eachSeries(events, function interatee(event, next){
     // if identifier, update related event.
     if (event.identifier) {
-      models.Identifier.find({where: {
+      models.identifier.find({where: {
         identifier: event.identifier,
         scheme: event.identifier_scheme
       }}).then(function(result){
         if (result) {
           logger.debug('Identifier found: ' + result.id + '. Updating event.');
-          models.Event.update(event, {where: {id: result.event_id}}).then(function(result) {
+          models.event.update(event, {where: {id: result.event_id}}).then(function(result) {
             logger.debug('Event updated.');
             next();
           }).catch(function(error) {
@@ -420,9 +478,9 @@ function upsertEvents(events, cb) {
           });
         } else {
           logger.debug('Identifier not found. Creating new event. ');
-          models.Event.create(event).then(function(result){
+          models.event.create(event).then(function(result){
             logger.debug('Event created: ' + result.id);
-            models.Identifier.create({
+            models.identifier.create({
               scheme: event.identifier_scheme,
               identifier: event.identifier,
               event_id: result.id
@@ -438,7 +496,7 @@ function upsertEvents(events, cb) {
         logger.error('Error creating identifier:', error);
       });
     } else {
-      models.Event.create(event).then(function(result){
+      models.event.create(event).then(function(result){
         logger.debug('Event created: ' + result.id);
         next();
       }).catch(function(error){

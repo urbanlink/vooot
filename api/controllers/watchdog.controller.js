@@ -20,7 +20,7 @@ exports.index = function(req,res) {
   var order = req.query.order || 'created_at DESC';
   var filter = {};
 
-  models.file.findAndCountAll({
+  models.watchdog.findAll({
     where: filter,
     limit: limit,
     offset: offset,
@@ -36,13 +36,10 @@ exports.index = function(req,res) {
 
 // Show a single file
 exports.show = function(req,res) {
-  models.file.findOne({
+  models.watchdog.findOne({
     where: {
       id: req.params.id
-    },
-    include: [
-      { model: models.identifier, as:'identifiers', attributes: ['scheme','identifier'] }
-    ]
+    }
   }).then(function(event){
     return res.json(event);
   }).catch(function(error) {
@@ -50,41 +47,15 @@ exports.show = function(req,res) {
   });
 };
 
-
-// Create a file
-exports.create = function(req,res){
-  models.file.create(req.body).then(function(result) {
-    return res.json(result);
-  }).catch(function(err) {
-    return handleError(res,err);
+exports.add = function(type, severity, message, variables) {
+  variables = JSON.stringify(variables) || '';
+  models.watchdog.create({
+    type: type,
+    message: message,
+    variables: variables,
+    severity: severity}).then(function(result) {
+    console.log('*** Watchdog *** ' + type + ': ' + message + '[' + severity + ']');
+  }).catch(function(error){
+    console.log(error);
   });
-};
-
-
-// Update a file record
-exports.update = function(req,res){
-  models.file.update(req.body, {
-    where: { id: req.params.id }
-  }).then(function(result){
-    return res.json(result);
-  }).catch(function(err){
-    return handleError(res,err);
-  });
-};
-
-
-// Delete a file record
-exports.destroy = function(req,res){
-  models.file.destroy({
-    where: { id: req.params.id }
-  }).then(function(result){
-    return res.json(result);
-  }).catch(function(err){
-    return handleError(res,err);
-  });
-};
-
-
-exports.syncFile = function(req,res) {
-  return res.json('sync');
 };

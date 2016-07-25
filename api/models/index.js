@@ -16,19 +16,21 @@ var sequelize = new Sequelize(settings.database.database, settings.database.user
   logging: false,
   define: {
     underscored: true,
-    timestamps: true
+    timestamps: true,
+    freezeTableName: true
   }
 });
 
 
+console.log('Reading model files.');
 var db = {};
-
 fs.readdirSync(__dirname).filter(function(file) {
   return (file.indexOf('.') !== 0) && (file !== 'index.js');
 }).forEach(function(file) {
   var model = sequelize['import'](path.join(__dirname, file));
   db[model.name] = model;
 });
+console.log('Done reading model files.');
 
 
 // Create associations for loaded models
@@ -37,7 +39,6 @@ Object.keys(db).forEach(function(modelName) {
     db[modelName].associate(db);
   }
 });
-
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

@@ -12,7 +12,7 @@ var running = false;
 function createMonthCalls(params) {
   var queries = [];
   var currentYear = moment().year();
-  var currentMonth = '2'; //moment().month();
+  var currentMonth = moment().month();
   for (var i=0; i<2; i++){
     currentMonth++;
     if (currentMonth>12) {
@@ -29,13 +29,13 @@ function updateEvents(events, cb) {
   async.eachSeries(events, function interatee(event, next){
     // if identifier, update related event.
     if (event.identifier) {
-      models.Identifier.find({where: {
+      models.identifier.find({where: {
         identifier: event.identifier,
         scheme: event.identifier_scheme
       }}).then(function(result){
         if (result) {
           console.log('Identifier found: ' + result.id + '. Updating event.');
-          models.Event.update(event, {where: {id: result.event_id}}).then(function(result) {
+          models.event.update(event, {where: {id: result.event_id}}).then(function(result) {
             console.log('event updated', result);
             next()
           }).catch(function(error) {
@@ -43,9 +43,9 @@ function updateEvents(events, cb) {
           });
         } else {
           console.log('Identifier not found. Creating new event. ');
-          models.Event.create(event).then(function(result){
+          models.event.create(event).then(function(result){
             console.log('event created: ' + result.id);
-            models.Identifier.create({
+            models.identifier.create({
               scheme: event.identifier_scheme,
               identifier: event.identifier,
               event_id: result.id
@@ -61,7 +61,7 @@ function updateEvents(events, cb) {
         console.log('error creating identifier:', error);
       });
     } else {
-      models.Event.create(event).then(function(result){
+      models.event.create(event).then(function(result){
         console.log('event created: ' + result.id);
         next();
       }).catch(function(error){
@@ -92,9 +92,9 @@ module.exports = {
     // Get organizations and source url for events.
     console.log('Fetching all organizations and source url for events.');
 
-    models.Organization.findAll({
+    models.organization.findAll({
       include: [
-        { model: models.Identifier, as: 'identifiers' }
+        { model: models.identifier, as: 'identifiers' }
       ]
     }).then(function(organizations) {
       console.log('Found ' + organizations.length + ' organization(s)');
@@ -151,7 +151,7 @@ module.exports = {
             }, 1000);
           }, function(err) {
             if (err) { console.log(err); }
-            console.log('queries done. processing events');
+            console.log('Queries done. Processing events. ');
             callback();
           });
         }
