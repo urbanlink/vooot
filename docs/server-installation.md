@@ -109,4 +109,9 @@
 
 
     # Git push from
+    nano /hooks/post-receive
+    #!/bin/sh
+    git --work-tree=/home/vooot/apps/api.vooot.nl/live --git-dir=/home/vooot/apps/api.vooot.nl/repo checkout -f
+    npm install
+    
     git push master production
