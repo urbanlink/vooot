@@ -4,16 +4,21 @@ do
     if [[ $ref =~ .*/master$ ]];
     then
         echo "Master ref received. Deploying master branch to production..."
-        cd /home/vooot/apps/api.vooot.nl/
-        rm -rf ./live
-        mkdir .live
-        git --work-tree=/home/vooot/apps/api.vooot.nl/live --git-dir=/home/vooot/apps/api.vooot.nl/repo checkout -f
-        cp /home/vooot/apps/api.vooot.nl/config/pm2.json ./pm2.js
-        cd live
+        rm -rf /home/vooot/apps/api.vooot.nl/production
+        mkdir /home/vooot/apps/api.vooot.nl/production
+        echo "Work directory cleaned."
+        git --work-tree=/home/vooot/apps/api.vooot.nl/production --git-dir=/home/vooot/apps/api.vooot.nl/repo checkout -f
+        echo "Repository checked out to production folder."
+        cd /home/vooot/apps/api.vooot.nl/production
+        cp /home/vooot/apps/api.vooot.nl/config/pm2.json /home/vooot/apps/api.vooot.nl/production/pm2.json
+        echo "PM2 configuration file copied."
         ls -la
-      	npm install
-      	pm2 start pm2.json
-      	echo "done."
+        echo "Installing node dependencies"
+        npm install
+        echo "NPM modules installed"
+        echo "Starting PM2"
+        pm2 start /home/vooot/apps/api.vooot.nl/production/pm2.json
+        echo "done."
 
     else
         echo "Ref $ref successfully received. Doing nothing: only the master branch may be deployed on this server."
