@@ -20,6 +20,8 @@
     "morgan": "^1.8.2",
     "mysql2": "^1.3.6",
     "node-schedule": "^1.2.3",
+    "passport": "^0.3.2",
+    "passport-jwt": "^2.2.1",
     "request": "^2.81.0",
     "sequelize": "^4.4.2",
     "winston": "^2.3.1"

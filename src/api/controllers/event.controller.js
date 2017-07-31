@@ -1,15 +1,15 @@
 'use strict';
 
 var models    = require('../models/index');
-var icalendar = require('icalendar');
+// var icalendar = require('icalendar');
 var moment    = require('moment');
-var cheerio   = require('cheerio');
+// var cheerio   = require('cheerio');
 var request   = require('request');
 var async     = require('async');
 var logger = require('winston');
 
 // custom notubiz parser
-var notubiz = require('./../../extractors/notubiz/');
+// var notubiz = require('./../../extractors/notubiz/');
 
 // error handler
 function handleError(res, err) {
@@ -19,33 +19,33 @@ function handleError(res, err) {
 
 //
 function toEvent(event) {
-  var vevent = new icalendar.VEvent(event.id);
-    if (event.name) { vevent.setSummary(event.name); }
-    if (event.description) { vevent.setDescription(event.description); }
-    if (event.start_date && event.end_date) { vevent.setDate(event.start_date, event.end_date); }
-    if (event.location) { vevent.addProperty('LOCATION', event.location); }
-  return vevent;
+  // var vevent = new icalendar.VEvent(event.id);
+  //   if (event.name) { vevent.setSummary(event.name); }
+  //   if (event.description) { vevent.setDescription(event.description); }
+  //   if (event.start_date && event.end_date) { vevent.setDate(event.start_date, event.end_date); }
+  //   if (event.location) { vevent.addProperty('LOCATION', event.location); }
+  // return vevent;
 }
 
 // Generate iCalendar file
 function toiCal(events, callback) {
 
-  var calendar = new icalendar.iCalendar();
-  calendar.properties.PRODID = [];
-  calendar.addProperty('PRODID', '-//voOot//Calendar//EN');
-  calendar.addProperty('SEQUENCE', '0');
-  calendar.addProperty('METHOD', 'REQUEST');
-
-  // Add events to calendar
-  for (var i=0; i<events.length; i++) {
-    var event = events[i];
-    if (event.start_date && event.end_date) {
-      var vevent = toEvent(event);
-      calendar.addComponent(vevent);
-    }
-  }
-
-  return callback(null, calendar);
+  // var calendar = new icalendar.iCalendar();
+  // calendar.properties.PRODID = [];
+  // calendar.addProperty('PRODID', '-//voOot//Calendar//EN');
+  // calendar.addProperty('SEQUENCE', '0');
+  // calendar.addProperty('METHOD', 'REQUEST');
+  //
+  // // Add events to calendar
+  // for (var i=0; i<events.length; i++) {
+  //   var event = events[i];
+  //   if (event.start_date && event.end_date) {
+  //     var vevent = toEvent(event);
+  //     calendar.addComponent(vevent);
+  //   }
+  // }
+  //
+  // return callback(null, calendar);
 }
 
 // Event index
@@ -258,13 +258,13 @@ exports.syncEvents = function(req,res) {
         // update or create each meeting synchronous.
         upsertEvents(meetings, function(result) {
           return res.json(result);
-          organization.updateAttributes({last_sync_date: new Date() }).then(function(result){
-
-          }).catch(function(error){
-            return handleError(res,err);
-          });
-          return res.json({status: 'ok', statusMessage: 'Updated ' + meetings.length + ' meetings. '});
-        })
+          // organization.updateAttributes({last_sync_date: new Date() }).then(function(result){
+          //
+          // }).catch(function(error){
+          //   return handleError(res,err);
+          // });
+          // return res.json({status: 'ok', statusMessage: 'Updated ' + meetings.length + ' meetings. '});
+        });
       } catch(e) {
         console.log(e);
         // Async call is done, alert via callback
@@ -314,60 +314,60 @@ exports.syncEvent = function(req,res) {
     }
 
     logger.log('Parsing ' + scheme + ' event.');
-    notubiz.parseEvent({
-      organization_identifier: event.dataValues.organization.dataValues.identifiers[0].identifier,
-      event_identifier: event.dataValues.identifiers[0].identifier
-    }, function(err,result) {
-      if (err) { return res.json(err); }
-
-      var items = result || {};
-      logger.debug('Received ' + items.length + ' agenda items for ' + scheme);
-
-      // Save each agenda-item to the database
-      logger.debug('Upserting all agenda items. ');
-      async.eachSeries(items, function interatee(item, next) {
-        // Add a reference to the right agenda to the agenda-item.
-        item.agenda_id = event.dataValues.agenda.dataValues.id;
-        item.identifier_scheme = scheme;
-
-        // Upsert the agenda-item based on the identifier.
-        logger.debug('Upserting agenda-item.');
-        upsertAgendaitemByIdentifier(item, function(error, result) {
-          if (error) { return handleError(res,error); }
-
-          var agendaItemId = result.id;
-
-          // Process the documents for this agenda-item
-          logger.debug('Upserting all documents for this agenda-item. ');
-          async.eachSeries(item.documents, function iteratee(doc, nextDoc) {
-            doc.agendaitem_id = agendaItemId;
-            doc.identifier_scheme = scheme;
-            upsertDocumentByIdentifier(doc, function(error, result) {
-              if (error) { return handleError(res,error); }
-              logger.debug('Document saved: ' + result.id);
-              nextDoc();
-            });
-          }, function(err){
-            // all docs processed.
-            logger.debug('All docs for this agenda-item are processed. ');
-            next();
-          });
-        });
-      }, function(err) {
-        // All items for the event are updated, update the event sync date
-        logger.debug('All agende-items are saved. Updating event sync date. ');
-        event.updateAttributes({ last_sync_date: new Date() }).then(function(result) {
-          logger.debug('Done synchronizing');
-          return res.json({
-            status: 'Event synchronized',
-            result: result,
-            error: err
-          });
-        }).catch(function(error) {
-          return handleError(res,error);
-        });
-      });
-    });
+    // notubiz.parseEvent({
+    //   organization_identifier: event.dataValues.organization.dataValues.identifiers[0].identifier,
+    //   event_identifier: event.dataValues.identifiers[0].identifier
+    // }, function(err,result) {
+    //   if (err) { return res.json(err); }
+    //
+    //   var items = result || {};
+    //   logger.debug('Received ' + items.length + ' agenda items for ' + scheme);
+    //
+    //   // Save each agenda-item to the database
+    //   logger.debug('Upserting all agenda items. ');
+    //   async.eachSeries(items, function interatee(item, next) {
+    //     // Add a reference to the right agenda to the agenda-item.
+    //     item.agenda_id = event.dataValues.agenda.dataValues.id;
+    //     item.identifier_scheme = scheme;
+    //
+    //     // Upsert the agenda-item based on the identifier.
+    //     logger.debug('Upserting agenda-item.');
+    //     upsertAgendaitemByIdentifier(item, function(error, result) {
+    //       if (error) { return handleError(res,error); }
+    //
+    //       var agendaItemId = result.id;
+    //
+    //       // Process the documents for this agenda-item
+    //       logger.debug('Upserting all documents for this agenda-item. ');
+    //       async.eachSeries(item.documents, function iteratee(doc, nextDoc) {
+    //         doc.agendaitem_id = agendaItemId;
+    //         doc.identifier_scheme = scheme;
+    //         upsertDocumentByIdentifier(doc, function(error, result) {
+    //           if (error) { return handleError(res,error); }
+    //           logger.debug('Document saved: ' + result.id);
+    //           nextDoc();
+    //         });
+    //       }, function(err){
+    //         // all docs processed.
+    //         logger.debug('All docs for this agenda-item are processed. ');
+    //         next();
+    //       });
+    //     });
+    //   }, function(err) {
+    //     // All items for the event are updated, update the event sync date
+    //     logger.debug('All agende-items are saved. Updating event sync date. ');
+    //     event.updateAttributes({ last_sync_date: new Date() }).then(function(result) {
+    //       logger.debug('Done synchronizing');
+    //       return res.json({
+    //         status: 'Event synchronized',
+    //         result: result,
+    //         error: err
+    //       });
+    //     }).catch(function(error) {
+    //       return handleError(res,error);
+    //     });
+    //   });
+    // });
   });
 };
 
@@ -438,11 +438,11 @@ function upsertDocumentByIdentifier(doc, cb) {
           // Add the file to the agenda-item
           models.agendaItem.findById(agendaItemId).then(function(agendaItem){
             console.log(agendaItem);
-            agendaitem.addFile(file).then(function(result) {
-              cb(null, { id: file.id });
-            }).catch(function(error) {
-              console.log('ee',error);
-            });
+            // agendaitem.addFile(file).then(function(result) {
+            //   cb(null, { id: file.id });
+            // }).catch(function(error) {
+            //   console.log('ee',error);
+            // });
           }).catch(function(error) {
             console.log('eee',error);
           });

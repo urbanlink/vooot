@@ -4,7 +4,6 @@ var models = require('../models/index');
 var settings = require('../../config/settings');
 var path = require('path');
 var logger = require('winston');
-var stream = require('./stream.controller');
 
 // error handler
 function handleError(res, err) {
@@ -44,48 +43,48 @@ exports.index = function(req,res) {
 // Find an account by id. Only for admins, auth0 and authenticated user account.
 exports.show = function(req,res) {
   console.log('Find user account: ' + req.params.id);
-  models.account.findOne({
-    where: {
-      id: req.params.id,
-    },
-    include: [{
-      model: models.person,
-      through: models.person_editors,
-      as: 'persons'
-    }, {
-      model: models.event,
-      through: models.event_followers,
-      as: 'events'
-    }]
-  }).then(function(account) {
-    // connect to stream.io
-    var userFeed = stream.feed('timeline_aggregated', account.dataValues.id);
-    // get activities from stream
-    userFeed.get({ limit: 100 }).then(function(stream) {
-      account.dataValues.userFeed = stream;
-    });
-
-
-    var notification_1 = stream.feed('notification', account.dataValues.id);
-    notification_1.get({'limit': 30}).then(function(result) {
-      console.log('result', result);
-      account.dataValues.notification = result;
-      var timeline_1 = stream.feed('timeline', account.dataValues.id);
-      timeline_1.get({'limit': 30}).then(function(result) {
-        console.log('result', result);
-        account.dataValues.stream = result;
-        return res.json(account);
-
-      }).catch(function(error) {
-        console.log(error);
-        return res.json(account);
-      });
-    });
-
-    // return res.json(account);
-  }).catch(function(error) {
-    return handleError(res,error);
-  });
+  // models.account.findOne({
+  //   where: {
+  //     id: req.params.id,
+  //   },
+  //   include: [{
+  //     model: models.person,
+  //     through: models.person_editors,
+  //     as: 'persons'
+  //   }, {
+  //     model: models.event,
+  //     through: models.event_followers,
+  //     as: 'events'
+  //   }]
+  // }).then(function(account) {
+  //   // connect to stream.io
+  //   var userFeed = stream.feed('timeline_aggregated', account.dataValues.id);
+  //   // get activities from stream
+  //   userFeed.get({ limit: 100 }).then(function(stream) {
+  //     account.dataValues.userFeed = stream;
+  //   });
+  //
+  //
+  //   var notification_1 = stream.feed('notification', account.dataValues.id);
+  //   notification_1.get({'limit': 30}).then(function(result) {
+  //     console.log('result', result);
+  //     account.dataValues.notification = result;
+  //     var timeline_1 = stream.feed('timeline', account.dataValues.id);
+  //     timeline_1.get({'limit': 30}).then(function(result) {
+  //       console.log('result', result);
+  //       account.dataValues.stream = result;
+  //       return res.json(account);
+  //
+  //     }).catch(function(error) {
+  //       console.log(error);
+  //       return res.json(account);
+  //     });
+  //   });
+  //
+  //   // return res.json(account);
+  // }).catch(function(error) {
+  //   return handleError(res,error);
+  // });
 };
 
 

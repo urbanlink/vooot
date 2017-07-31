@@ -4,7 +4,7 @@ var models = require('../models/index');
 var settings = require('../../config/settings');
 var path = require('path');
 var logger = require('winston');
-var stream = require('./stream.controller');
+// var stream = require('./stream.controller');
 
 
 // error handler
@@ -183,15 +183,15 @@ exports.follow = function(req,res) {
       if (account){
         person.addFollower(account).then(function(result) {
 
-          stream.follow({
-            user_id: req.body.account_id,
-            follower_type: 'person',
-            follower_id: req.body.person_id,
-            insertId: 1,
-            created_at: new Date()
-          }, function(result) {
-            console.log(result);
-          });
+          // stream.follow({
+          //   user_id: req.body.account_id,
+          //   follower_type: 'person',
+          //   follower_id: req.body.person_id,
+          //   insertId: 1,
+          //   created_at: new Date()
+          // }, function(result) {
+          //   console.log(result);
+          // });
 
           return res.json(result);
         }).catch(function(error){

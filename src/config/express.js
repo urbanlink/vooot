@@ -7,30 +7,42 @@ var methodOverride = require('method-override');
 var errorHandler = require('errorhandler');
 var settings = require('./settings');
 var cors = require('cors');
-var logger = require('winston');
-var jwt = require('./../api/middleware/jwt.service');
-var helmet = require('helmet');
-
+var logger = require('./logger');
+var auth = require('./auth')();
+var passport = require("passport");
+var jwt = require('express-jwt');
 
 module.exports = function(app) {
+  logger.info('Initiating express.');
   var env = settings.environment;
 
   app.use(compression());
-  // parse application/x-www-form-urlencoded
+  app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: false }));
   app.use(methodOverride());
   app.use(cors());
-  //app.use(cookieParser());
-  app.use(helmet());
-  
-  // Validate the JWT for every request.
-  app.use(function (req, res, next) {
-    jwt.decode(req, function(result) {
-      next();
-    });
-  });
 
+  app.use(jwt({
+    secret: settings.jwt.secret,
+  }).unless({
+    path: [
+      '/',
+      '/account/login',
+      { url: '/account', methods: ['POST']  }
+    ]
+  }));
+
+  // return error message for unauthorized requests
+  app.use(function (err, req, res, next) {
+    console.log(err);
+    if (err.name === 'UnauthorizedError') {
+      res.status(401).json({
+        message: err.message,
+        code: err.code,
+        status: err.status
+      });
+    }
+  });
 
   if ('production' === env) {
     //app.use(express.static(path.join(settings.root, 'public')));
@@ -44,4 +56,6 @@ module.exports = function(app) {
     //app.set('appPath', 'client');
     app.use(errorHandler()); // Error handler - has to be last
   }
+
+  logger.info('Express initiated.');
 };

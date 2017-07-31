@@ -2,7 +2,6 @@
 
 var models = require('../models/index');
 var settings = require('../../config/settings');
-var jwt = require('../middleware/jwt.service');
 
 exports.canView = function(req,res,next) {
   next();
