@@ -44,6 +44,12 @@ module.exports = {
     endpoint    : process.env.AWS_S3_ENDPOINT       || env.AWS_S3_ENDPOINT         || '',
   },
 
+  stream: {
+    key         : process.env.STREAM_KEY            || env.STREAM_KEY              || '' ,
+    secret     : process.env.STREAM_SECRET         || env.STREAM_SECRET           || '' ,
+    appId       : process.env.STREAM_APP_ID         || env.STREAM_APP_ID            || ''
+  },
+
   // synchronization settings.
   sync: {
 

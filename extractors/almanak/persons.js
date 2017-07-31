@@ -1,9 +1,10 @@
 'use strict';
 
 // Get persons from the almanak for an organisation
-
 var cheerio = require('cheerio');
 var request = require('request');
+
+
 
 exports.extractPersons = function(req,res) {
   var source = req.query.source;
@@ -70,6 +71,16 @@ exports.extractPerson = function(req,res) {
     if (err) { return res.json(err); }
     body = body.replace(/^\s+|\s+$/g, '').replace(/\r?\n|\r|\t/g, '');
     var $ = cheerio.load(body);
-    
+
   });
+};
+
+
+
+exports.massExtractor = function(args) {
+
+};
+
+exports.itemExtractor = function(args) {
+
 };

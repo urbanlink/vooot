@@ -8,20 +8,25 @@ var controller = require('../controllers/account.controller');
 
 module.exports = function(app){
 
+  router.get('/:id',
+    permission.canView,
+    controller.show
+  );
+
+  router.post('/me',
+    permission.canView,
+    controller.me
+  );
+
   // router.get('/',
   //   permission.canView,
   //   controller.index
   // );
 
-  router.post('/sync',
-    permission.canCreate,
-    controller.sync
-  );
-
-  router.get('/:id',
-    permission.canView,
-    controller.show
-  );
+  // router.post('/sync',
+  //   permission.canCreate,
+  //   controller.sync
+  // );
 
   // router.put('/:id',
   //   permission.canUpdate,

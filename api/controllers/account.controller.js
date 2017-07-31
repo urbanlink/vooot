@@ -4,6 +4,7 @@ var models = require('../models/index');
 var settings = require('../../config/settings');
 var path = require('path');
 var logger = require('winston');
+var stream = require('./stream.controller');
 
 // error handler
 function handleError(res, err) {
@@ -11,47 +12,12 @@ function handleError(res, err) {
   return res.status(500).json({status:'error', msg:err});
 }
 
-// Synchronize a local account item with the auth0 data. (auth0 takes precendece).
-/*
 
-possibilites:
-  - auth0 account with vooot-account
-  - auth0 account without vooot-account
-  - auth0 account with outdated vooot-account
-  - auth0 account without vooot-id in app_metadata
-*/
-exports.sync = function(req,res) {
-  var data = req.body;
+// Return currently logged in user
+exports.me = function(req,res) {
 
-  if (!data.email) { return handleError(res, 'Required field __email__ is missing. '); }
-
-  models.account.find({
-    where: { email: data.email }
-  }).then(function(account) {
-    // console.log(account);
-    if (!account) {
-      // Create a new account if it doesn't exist yet
-      models.account.create(data).then(function(result) {
-        return res.json(result);
-      }).catch(function(error) {
-        return handleError(res, error);
-      });
-    } else {
-      // Update an existing account with auth0 values if needed.
-      models.account.update(data, {
-        where: { id: account.dataValues.id }
-      }).then(function(result) {
-        console.log(result);
-        return res.json(result);
-      }).catch(function(err){
-        console.log(err);
-        return handleError(res,err);
-      });
-    }
-  }).catch(function(error) {
-    return handleError(res,error);
-  });
 };
+
 
 // File index
 exports.index = function(req,res) {
@@ -92,8 +58,31 @@ exports.show = function(req,res) {
       as: 'events'
     }]
   }).then(function(account) {
-    console.log(account);
-    return res.json(account);
+    // connect to stream.io
+    var userFeed = stream.feed('timeline_aggregated', account.dataValues.id);
+    // get activities from stream
+    userFeed.get({ limit: 100 }).then(function(stream) {
+      account.dataValues.userFeed = stream;
+    });
+
+
+    var notification_1 = stream.feed('notification', account.dataValues.id);
+    notification_1.get({'limit': 30}).then(function(result) {
+      console.log('result', result);
+      account.dataValues.notification = result;
+      var timeline_1 = stream.feed('timeline', account.dataValues.id);
+      timeline_1.get({'limit': 30}).then(function(result) {
+        console.log('result', result);
+        account.dataValues.stream = result;
+        return res.json(account);
+
+      }).catch(function(error) {
+        console.log(error);
+        return res.json(account);
+      });
+    });
+
+    // return res.json(account);
   }).catch(function(error) {
     return handleError(res,error);
   });
@@ -108,6 +97,7 @@ exports.create = function(req,res) {
   });
 };
 
+
 exports.update = function(req,res) {
   models.user.create(req.body).then(function(result) {
 
@@ -115,6 +105,7 @@ exports.update = function(req,res) {
     console.log(error);
   });
 };
+
 
 exports.destroy = function(req,res) {
   models.user.create(req.body).then(function(result) {

@@ -24,6 +24,16 @@ module.exports = function(sequelize, DataTypes) {
           as:'followers'
         });
 
+        // An account can follow multiple organizations, and an organization can be followed by multiple accounts (many-to-many)
+        Account.belongsToMany(models.organization, {
+          through: 'organization_followers',
+          as:'accounts'
+        });
+        models.organization.belongsToMany(Account, {
+          through: 'organization_followers',
+          as:'followers'
+        });
+
         // An account can edit multiple persons, and a person can be followed by multiple accounts (many-to-many)
         Account.belongsToMany(models.person, {
           through: 'person_editors',

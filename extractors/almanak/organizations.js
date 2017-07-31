@@ -80,3 +80,21 @@ exports.extractMunicipalities = function(req,res,next) {
     getAZOrganizations();
   });
 };
+
+
+// Fetch all organisations from the Almanak
+exports.massExtractor = function(args) {
+  args = args || {};
+  args.classicication = args.classicication || 'municipality';
+
+  // Fetch the list of organizations.
+
+  // Then, fetch all the organization details.
+
+};
+
+
+// Fetch details about a specific organization
+exports.itemExtractor = function(args) {
+
+};

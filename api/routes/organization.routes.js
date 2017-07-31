@@ -33,6 +33,19 @@ module.exports = function(app) {
     controller.destroy
   );
 
+
+  // Follow and unfollow an organization by an account
+  router.post('/:id/follow',
+    permissions.canUpdate,
+    controller.follow
+  );
+
+  router.post('/:id/unfollow',
+    permissions.canUpdate,
+    controller.unfollow
+  );
+
+
   router.post('/:id/editor',
     permissions.canUpdate,
     controller.addEditor
