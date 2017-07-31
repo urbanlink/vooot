@@ -1,7 +1,7 @@
 {
   "name": "vooot-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend service for voOot, the service for local government information.",
   "main": "server.js",
   "repository": "https://github.com/urbanlink/vooot-api",
   "dependencies": {
