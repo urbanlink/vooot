@@ -21,7 +21,7 @@ function feed(type,id) {
  * @returns {object} Returns data or error
  **/
 function follow(data, cb) {
-  console.log('Send follow request to stream-io');
+  logger.info('Send follow request to stream-io');
 
   var userFeed = client.feed('user', data.user_id);
 
@@ -35,7 +35,7 @@ function follow(data, cb) {
     to: ['notification:' + data.follower_id]
   };
 
-  console.log('activity: ', activity);
+  logger.info('activity: ', activity);
   // instantiate a feed using feed class 'timeline_flat' and the user id from the database
   var timeline = client.feed('timeline_flat', data.user_id);
   timeline.follow(data.follower_type, data.follower_id);

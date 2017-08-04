@@ -65,11 +65,11 @@ exports.create = function(req,res){
 
 // Update a file record
 exports.update = function(req,res) {
-  console.log('Updating message ' + req.params.id);
+  logger.info('Updating message ' + req.params.id);
   models.message.update(req.body, {
     where: { id: req.params.id }
   }).then(function(result) {
-    console.log('done');
+    logger.info('done');
     return res.json(result);
   }).catch(function(err){
     return handleError(res,err);

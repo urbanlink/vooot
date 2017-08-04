@@ -25,7 +25,7 @@ function createMonthCalls(params) {
 }
 
 function updateEvents(events, cb) {
-  console.log('Updating or inserting ' + events.length + ' events.');
+  logger.info('Updating or inserting ' + events.length + ' events.');
   async.eachSeries(events, function interatee(event, next){
     // if identifier, update related event.
     if (event.identifier) {
@@ -34,43 +34,43 @@ function updateEvents(events, cb) {
         scheme: event.identifier_scheme
       }}).then(function(result){
         if (result) {
-          console.log('Identifier found: ' + result.id + '. Updating event.');
+          logger.info('Identifier found: ' + result.id + '. Updating event.');
           models.event.update(event, {where: {id: result.event_id}}).then(function(result) {
-            console.log('event updated', result);
+            logger.info('event updated', result);
             next()
           }).catch(function(error) {
-            console.log('event update error', error);
+            logger.info('event update error', error);
           });
         } else {
-          console.log('Identifier not found. Creating new event. ');
+          logger.info('Identifier not found. Creating new event. ');
           models.event.create(event).then(function(result){
-            console.log('event created: ' + result.id);
+            logger.info('event created: ' + result.id);
             models.identifier.create({
               scheme: event.identifier_scheme,
               identifier: event.identifier,
               event_id: result.id
             }).then(function(result){
-              console.log('identifier created: ' + result.id);
+              logger.info('identifier created: ' + result.id);
               next();
             });
           }).catch(function(error){
-            console.log('Error creating event, ', error);
+            logger.info('Error creating event, ', error);
           });
         }
       }).catch(function(error){
-        console.log('error creating identifier:', error);
+        logger.info('error creating identifier:', error);
       });
     } else {
       models.event.create(event).then(function(result){
-        console.log('event created: ' + result.id);
+        logger.info('event created: ' + result.id);
         next();
       }).catch(function(error){
-        console.log('error creating event:', error);
+        logger.info('error creating event:', error);
       });
     }
   }, function(err) {
-    if (err) { console.log(err); }
-    console.log('Iterating done. ');
+    if (err) { logger.info(err); }
+    logger.info('Iterating done. ');
     cb();
   });
 }
@@ -88,42 +88,42 @@ module.exports = {
     running=!running;
     var meetings = [];
 
-    console.log('Cron: Syncing all future events for organizations. ');
+    logger.info('Cron: Syncing all future events for organizations. ');
     // Get organizations and source url for events.
-    console.log('Fetching all organizations and source url for events.');
+    logger.info('Fetching all organizations and source url for events.');
 
     models.organization.findAll({
       include: [
         { model: models.identifier, as: 'identifiers' }
       ]
     }).then(function(organizations) {
-      console.log('Found ' + organizations.length + ' organization(s)');
+      logger.info('Found ' + organizations.length + ' organization(s)');
       if (!organizations || organizations.length<1) { return; }
 
       async.each(organizations, function(organization,callback) {
         // get events for the Organization
-        console.log('Fetching future 12 month events for organization: ' + organization.name);
+        logger.info('Fetching future 12 month events for organization: ' + organization.name);
         var identifier;
         if (organization.identifiers[0]) {
           identifier = organization.identifiers[0].dataValues;
-          console.log(identifier);
+          logger.info(identifier);
 
           var ori_source =  'http://' + identifier.identifier + '.raadsinformatie.nl';
           var queries = createMonthCalls({ori_source: ori_source + '/api/calendar?'});
 
           async.each(queries, function(query, callback2){
-            console.log(query);
+            logger.info(query);
             // put in timer to prevent conn refused
             setTimeout(function() {
               request.get(query, function(err,response,body) {
                 if (err) {
-                  console.log(err);
+                  logger.info(err);
                   // Async call is done, alert via callback
                   callback2();
                 } else {
                   try {
                     body = JSON.parse(body);
-                    //console.log(body);
+                    //logger.info(body);
                     if (body.meetings && body.meetings.length>0) {
                       for (var k=0; k<body.meetings.length; k++) {
                         var meeting = body.meetings[ k];
@@ -142,7 +142,7 @@ module.exports = {
                     // Async call is done, alert via callback
                     callback2();
                   } catch(e) {
-                    console.log(e);
+                    logger.info(e);
                     // Async call is done, alert via callback
                     callback2();
                   }
@@ -150,18 +150,18 @@ module.exports = {
               });
             }, 1000);
           }, function(err) {
-            if (err) { console.log(err); }
-            console.log('Queries done. Processing events. ');
+            if (err) { logger.info(err); }
+            logger.info('Queries done. Processing events. ');
             callback();
           });
         }
       }, function(err){
-        if (err) { console.log('error'); }
-        console.log('done fetching meetings. ');
-        console.log('meetings: ' + meetings.length);
+        if (err) { logger.info('error'); }
+        logger.info('done fetching meetings. ');
+        logger.info('meetings: ' + meetings.length);
         updateEvents(meetings, function(error) {
-          if(error){ console.log(error); }
-          console.log('Done updating meetings');
+          if(error){ logger.info(error); }
+          logger.info('Done updating meetings');
           running=false;
         });
       });

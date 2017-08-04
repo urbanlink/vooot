@@ -2,38 +2,74 @@
 
 module.exports = function(sequelize, DataTypes) {
 
-  var Person = sequelize.define('person', {
+  // Setup fields
+  var Model = sequelize.define('person', {
 
-    name: {
+    firstname: {
       type: DataTypes.STRING,
       required: true,
+    },
+
+    lastname: {
+      type: DataTypes.STRING,
+      required: true,
+    },
+
+    displayname: {
+      type: DataTypes.STRING
     },
 
     gender: {
       type: DataTypes.STRING
     },
 
-    image: {
+    birthdate: {
+      type: DataTypes.STRING
+    },
+
+    deathdate: {
+      type: DataTypes.STRING
+    },
+
+    headshot: {
+      type: DataTypes.STRING,
+    },
+
+    summary: {
       type: DataTypes.STRING,
     },
 
     biography: {
       type: DataTypes.TEXT,
     }
-  }, {
-    classMethods: {
-      associate: function(models) {
-        Person.hasMany(models.identifier, {
-          as: 'identifiers'
-        });
-
-        Person.belongsToMany(models.organization, {
-          as: 'memberships',
-          through: 'membership'
-        });
-      }
-    }
   });
 
-  return Person;
+
+  // Setup associations
+  Model.associate = function(models) {
+
+    // Identifiers for a person
+    Model.hasMany(models.identifier, {
+      as: 'identifiers'
+    });
+    // Other names
+    Model.hasMany(models.person_othername, {
+      as: 'othernames'
+    });
+    // Contact information
+    Model.hasMany(models.person_contact, {
+      as: 'contacts'
+    });
+    // Links for this person
+    Model.hasMany(models.link, {
+      as: 'links'
+    });
+    // Jobs for this person
+    Model.hasMany(models.person_job, {
+      as: 'jobs'
+    });
+
+  };
+
+  return Model;
 };

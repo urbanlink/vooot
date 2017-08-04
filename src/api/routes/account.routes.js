@@ -2,8 +2,8 @@
 
 var express = require('express');
 var router = express.Router();
-var permission = require('../permissions/account.permissions');
-var controller = require('../controllers/account.controller');
+var permission = require('./../permissions/account.permissions');
+var controller = require('./../controllers/account.controller');
 
 
 module.exports = function(app){

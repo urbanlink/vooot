@@ -13,7 +13,7 @@ var logger = require('winston');
 
 // error handler
 function handleError(res, err) {
-  console.log(err);
+  logger.info(err);
   return res.status(500).json({status:'error', msg:err});
 }
 
@@ -51,7 +51,7 @@ function toiCal(events, callback) {
 // Event index
 exports.index = function(req,res) {
 
-  console.log(req.query);
+  logger.info(req.query);
 
   var limit = parseInt(req.query.limit) || 100;
   if (limit > 100) { limit = 100; }
@@ -74,7 +74,7 @@ exports.index = function(req,res) {
   if (req.query.account_id) {
     models.account.findOne({ where: { id: req.query.account_id}}).then(function(account){
       account.getEvents().then(function(events){
-        console.log(events);
+        logger.info(events);
         return res.json({rows: events});
       });
     });
@@ -266,7 +266,7 @@ exports.syncEvents = function(req,res) {
           // return res.json({status: 'ok', statusMessage: 'Updated ' + meetings.length + ' meetings. '});
         });
       } catch(e) {
-        console.log(e);
+        logger.info(e);
         // Async call is done, alert via callback
         //callback2();
       }
@@ -437,14 +437,14 @@ function upsertDocumentByIdentifier(doc, cb) {
 
           // Add the file to the agenda-item
           models.agendaItem.findById(agendaItemId).then(function(agendaItem){
-            console.log(agendaItem);
+            logger.info(agendaItem);
             // agendaitem.addFile(file).then(function(result) {
             //   cb(null, { id: file.id });
             // }).catch(function(error) {
-            //   console.log('ee',error);
+            //   logger.info('ee',error);
             // });
           }).catch(function(error) {
-            console.log('eee',error);
+            logger.info('eee',error);
           });
         });
       }).catch(function(error) {

@@ -1,4 +1,6 @@
 // auth.js
+
+var logger = require('./logger');
 var passport = require("passport");
 var passportJWT = require("passport-jwt");
 var settings = require("./settings.js");
@@ -10,7 +12,7 @@ var params = {
 };
 
 module.exports = function() {
-  console.log('Setting up strategy');
+  logger.info('Setting up strategy');
   var strategy = new Strategy(params, function(payload, done) {
     if (payload.id) {
       return done(null, {
@@ -33,7 +35,7 @@ module.exports = function() {
 
   return {
     initialize: function() {
-      console.log('Initializing auth');
+      logger.info('Initializing auth');
       return passport.initialize();
     },
     authenticate: function() {

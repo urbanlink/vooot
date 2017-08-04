@@ -2,19 +2,21 @@
 
 module.exports = function(sequelize, DataTypes) {
 
-  var Model = sequelize.define('identifier', {
+  var Model = sequelize.define('person_othername', {
 
-    value: {
+    name: {
       type: DataTypes.STRING,
-      required: true
+      required: true,
     }
   });
 
+  // Setup associations
   Model.associate = function(models) {
-    Model.belongsTo(models.identifier_type, {
+    Model.belongsTo(models.person_othername_type, {
       as: 'type'
     });
   };
+
 
   return Model;
 };

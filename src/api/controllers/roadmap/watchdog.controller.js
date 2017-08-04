@@ -54,8 +54,8 @@ exports.add = function(type, severity, message, variables) {
     message: message,
     variables: variables,
     severity: severity}).then(function(result) {
-    console.log('*** Watchdog *** ' + type + ': ' + message + '[' + severity + ']');
+    logger.info('*** Watchdog *** ' + type + ': ' + message + '[' + severity + ']');
   }).catch(function(error){
-    console.log(error);
+    logger.info(error);
   });
 };

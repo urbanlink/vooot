@@ -43,13 +43,13 @@ function createParty(party, cb) {
       models.organization.create(party).then(function(result) {
         cb(result);
       }).catch(function(error){
-        console.log(error);
+        logger.info(error);
       });
     } else {
       cb(result);
     }
   }).catch(function(error) {
-    console.log(error);
+    logger.info(error);
   });
 }
 
@@ -62,13 +62,13 @@ function createOrganization(organization, cb) {
     }).then(function(identifier) {
       cb();
     }).catch(function(error) {
-      console.log(error);
+      logger.info(error);
     });
   });
 }
 
 function createPerson(person, cb) {
-  console.log('Creating person: ', person);
+  logger.info('Creating person: ', person);
   models.person.create(person).then(function(result) {
     var newPerson = result.dataValues;
     // Add identifier
@@ -77,15 +77,15 @@ function createPerson(person, cb) {
       identifier: person.identifiers[ 0].identifier,
       person_id: newPerson.id
     }).then(function(identifier) {
-      console.log(identifier);
+      logger.info(identifier);
       newPerson.identifiers = [];
       newPerson.identifiers.push(identifier.dataValues);
       cb(newPerson);
     }).catch(function(error) {
-      console.log(error);
+      logger.info(error);
     });
   }).catch(function(error) {
-    console.log(error);
+    logger.info(error);
   });
 }
 
@@ -94,22 +94,22 @@ module.exports = {
   // Get all municipalities from almanak.overheid
   organizations: function(cb) {
     models.organization.destroy({where: {}}).then(function(result) {
-      console.log('Organizations deleted. ');
+      logger.info('Organizations deleted. ');
       models.event.destroy({where: {}}).then(function(result) {
-        console.log('Events deleted. ');
+        logger.info('Events deleted. ');
         models.identifier.destroy({where: {}}).then(function(result){
           extractor.extractMunicipalities({}, {
             json: function(result) {
               var organizations = result;
-              console.log('Municipalities extracted. ');
-              console.log('Do the loop');
+              logger.info('Municipalities extracted. ');
+              logger.info('Do the loop');
               asyncLoop(organizations.length, function(loop) {
                 createOrganization(organizations[ loop.iteration()], function(result) {
                   // Okay, for cycle could continue
                   loop.next();
                 });
               }, function() {
-                console.log('Loop finished!');
+                logger.info('Loop finished!');
                 cb();
               });
             }
@@ -121,7 +121,7 @@ module.exports = {
 
   // Get all persons from all municipalities and add membership to municipality and party
   persons: function(cb) {
-    console.log('Extracting persons. ');
+    logger.info('Extracting persons. ');
     // Fetch all municipalities from the database.
     models.organization.findAll({
       where: {
@@ -136,47 +136,47 @@ module.exports = {
         }
       }]
     }).then(function(result) {
-      console.log(result.length + ' organizations retrieved.');
+      logger.info(result.length + ' organizations retrieved.');
       // Placeholder for the list of all persons.
       var persons = [];
       // Fetch all persons from almanak per municipality
-      console.log('starting the loop');
+      logger.info('starting the loop');
       asyncLoop(result.length, function(loop) {
         var source =  'https://almanak.overheid.nl' + result[ loop.iteration()].identifiers[0].identifier;
         var organizationId = result[ loop.iteration()].id;
-        console.log('Organization id: ' + organizationId);
+        logger.info('Organization id: ' + organizationId);
 
         // Get the persons from the municipality.
         personExtractor.extractPersons({ query: { source: source}}, {
           json: function(result) {
-            console.log('Number of persons received: ' + result.length);
+            logger.info('Number of persons received: ' + result.length);
             // Add to the total persons array
             persons = persons.concat(result);
 
             // add persons and identifiers.
             asyncLoop(result.length, function(loop2) {
               var person = result[ loop2.iteration()];
-              console.log('Result person: ', person);
+              logger.info('Result person: ', person);
 
               createPerson(person, function(newPerson) {
-                console.log('Person create result: ', newPerson);
+                logger.info('Person create result: ', newPerson);
                 // Create Party if not exists
                 var party = {
                   classification: 'party',
                   name: person.memberships[ 1].party
                 };
-                console.log('Creating party: ', party);
+                logger.info('Creating party: ', party);
                 createParty(party, function(result){
-                  console.log('Creating party result: ', result);
-                  console.log(models.membership);
-                  console.log(newPerson);
+                  logger.info('Creating party result: ', result);
+                  logger.info(models.membership);
+                  logger.info(newPerson);
                   // Create membership for the party for the person
                   models.membership.create({
                     person_id: newPerson.id,
                     organization_id: result.dataValues.id,
                     role: 'member'
                   }).then(function(result) {
-                    console.log(result);
+                    logger.info(result);
                     models.membership.create({
                       person_id: newPerson.id,
                       organization_id: organizationId,
@@ -184,7 +184,7 @@ module.exports = {
                     }).then(function(result) {
                       loop2.next();
                     }).catch(function(error) {
-                      console.log(error);
+                      logger.info(error);
                     });
                   });
                 });
@@ -195,13 +195,13 @@ module.exports = {
           }
         });
       }, function() {
-        console.log('get persons list complete');
-        console.log(persons.length);
-        console.log(persons[ 0]);
+        logger.info('get persons list complete');
+        logger.info(persons.length);
+        logger.info(persons[ 0]);
         cb();
       });
     }).catch(function(error) {
-      console.log(error);
+      logger.info(error);
     });
   }
 
@@ -210,9 +210,9 @@ module.exports = {
 
   // organizations: function(cb) {
   //   models.organization.destroy({where: {}}).then(function(result) {
-  //     console.log('Organizations deleted. ');
+  //     logger.info('Organizations deleted. ');
   //     models.event.destroy({where: {}}).then(function(result) {
-  //       console.log('Events deleted. ');
+  //       logger.info('Events deleted. ');
   //       models.identifier.destroy({where: {}}).then(function(result){
   //         models.organization.create({
   //           name: 'Gemeente Den Haag',
@@ -223,7 +223,7 @@ module.exports = {
   //             identifier: 'denhaag',
   //             organization_id: organization.id
   //           }).then(function(result) {
-  //             console.log('Identifier created: ' + result.id);
+  //             logger.info('Identifier created: ' + result.id);
   //             // Create persons
   //             models.person.bulkCreate([
   //               {
@@ -249,13 +249,13 @@ module.exports = {
   //             ]).then(function(result) {
   //               cb();
   //             }).catch(function(error) {
-  //               console.log(error);
+  //               logger.info(error);
   //             });
   //           }).catch(function(error){
-  //             console.log(error);
+  //             logger.info(error);
   //           });
   //         }).catch(function(error){
-  //           console.log(error);
+  //           logger.info(error);
   //         });
   //       });
   //     });

@@ -7,7 +7,7 @@ var request = require('request');
 
 module.exports.parseEvent = function(options, cb) {
     var o = options || {};
-    console.log('options', o);
+    logger.info('options', o);
     if (!o.organization_identifier) { return cb({msg: 'organization_identifier missing. '}); }
     if (!o.event_identifier) { return cb({msg: 'event_identifier missing. '}); }
 

@@ -2,24 +2,22 @@
 
 module.exports = function(sequelize, DataTypes) {
 
-  var Link = sequelize.define('link', {
-    url: {
+  var Model = sequelize.define('link', {
+
+    title: {
       type: DataTypes.STRING,
-      allowNull: false
     },
-    note: {
-      type: DataTypes.TEXT
-    }
-  }, {
-    classMethods: {
-      associate: function(models) {
-        Link.belongsTo(models.organization, {
-          foreignKey: 'organization_id',
-          as: 'organization'
-        });
-      }
+    value: {
+      type: DataTypes.STRING,
+      required: true,
+    },
+    description: {
+      type: DataTypes.STRING,
+    },
+    category: {
+      type: DataTypes.STRING,
     }
   });
 
-  return Link;
+  return Model;
 };

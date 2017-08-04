@@ -42,7 +42,7 @@ exports.index = function(req,res) {
 
 // Find an account by id. Only for admins, auth0 and authenticated user account.
 exports.show = function(req,res) {
-  console.log('Find user account: ' + req.params.id);
+  logger.info('Find user account: ' + req.params.id);
   // models.account.findOne({
   //   where: {
   //     id: req.params.id,
@@ -67,16 +67,16 @@ exports.show = function(req,res) {
   //
   //   var notification_1 = stream.feed('notification', account.dataValues.id);
   //   notification_1.get({'limit': 30}).then(function(result) {
-  //     console.log('result', result);
+  //     logger.info('result', result);
   //     account.dataValues.notification = result;
   //     var timeline_1 = stream.feed('timeline', account.dataValues.id);
   //     timeline_1.get({'limit': 30}).then(function(result) {
-  //       console.log('result', result);
+  //       logger.info('result', result);
   //       account.dataValues.stream = result;
   //       return res.json(account);
   //
   //     }).catch(function(error) {
-  //       console.log(error);
+  //       logger.info(error);
   //       return res.json(account);
   //     });
   //   });
@@ -92,7 +92,7 @@ exports.create = function(req,res) {
   models.user.create(req.body).then(function(result) {
 
   }).catch(function(error){
-    console.log(error);
+    logger.info(error);
   });
 };
 
@@ -101,7 +101,7 @@ exports.update = function(req,res) {
   models.user.create(req.body).then(function(result) {
 
   }).catch(function(error){
-    console.log(error);
+    logger.info(error);
   });
 };
 
@@ -110,6 +110,6 @@ exports.destroy = function(req,res) {
   models.user.create(req.body).then(function(result) {
 
   }).catch(function(error){
-    console.log(error);
+    logger.info(error);
   });
 };

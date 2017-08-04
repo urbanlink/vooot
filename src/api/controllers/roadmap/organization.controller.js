@@ -6,7 +6,7 @@ var logger = require('winston');
 
 // error handler
 function handleError(res, err) {
-  console.log('Error: ', err);
+  logger.info('Error: ', err);
   return res.status(500).json({status:'error', msg:err});
 }
 
@@ -83,7 +83,7 @@ exports.show = function(req,res) {
     // get feed
     // var stream = require('./stream.controller');
     // var orgStream = stream.instantiateFeed('timeline', req.user.dataValues.id);
-    // console.log(orgStream);
+    // logger.info(orgStream);
     // TEST
     // Add an activity to the flat stream for this organization
     var stream = require('./stream.controller');
@@ -94,30 +94,30 @@ exports.show = function(req,res) {
       object: 'organization:' + organization.dataValues.id
     };
     orgStream.addActivity(activity).then(function(data) {
-      console.log(data);
+      logger.info(data);
     }).catch(function(error) {
-      console.log(error);
+      logger.info(error);
     });
 
     // var activity = {"actor": "User:1", "verb": "watch", "object": "Organization:" + organization.dataValues.id, "target": "Board:1"};
     // orgStream.addActivity(activity).then(function(data) {
     //   /* on success */
-    //   // console.log(data);
+    //   // logger.info(data);
     //
     //   var timeline_1 = stream.feed('timeline', '1');
     //   timeline_1.follow('organization', organization.dataValues.id);
-    //   // console.log(timeline_1);
+    //   // logger.info(timeline_1);
     //
     //   timeline_1.get({'limit': 30}).then(function(result) {
-    //     console.log(result);
+    //     logger.info(result);
     //   }).catch(function(error) {
-    //     console.log(error);
+    //     logger.info(error);
     //   });
     //
     //
     // }).catch(function(reason) {
     //   /* on failure, reason.error contains an explanation */
-    //   console.log(reason);
+    //   logger.info(reason);
     // });
 
     return res.json(organization);
@@ -128,10 +128,10 @@ exports.show = function(req,res) {
 };
 
 exports.create = function(req,res) {
-  console.log('Creating new organization: ', req.body.name);
+  logger.info('Creating new organization: ', req.body.name);
   models.organization.create(req.body).then(function(result) {
     // Watchdog.add('organization', 'NOTICE', 'New organisation created.', { id: result.id });
-    console.log('Organization created: ' + result.id);
+    logger.info('Organization created: ' + result.id);
     return res.json(result);
   }).catch(function(err) {
     handleError(res,err);
@@ -190,7 +190,7 @@ exports.query = function(req,res) {
 exports.follow = function(req, res) {
   // Fetch the organization
   models.organization.findById(parseInt(req.body.organization_id)).then(function(organization) {
-    console.log(organization);
+    logger.info(organization);
     // then find the account that will follow the organization
     models.account.findById(req.body.account_id).then(function(account) {
       if (account){
@@ -208,7 +208,7 @@ exports.follow = function(req, res) {
           //var orgStream = stream.instantiateFeed('timeline', req.user.dataValues.id);
           // Let user's flat feed follow organization's feed
           // var userFeed = stream.feed('user', String(req.body.account_id));
-          // console.log(userFeed);
+          // logger.info(userFeed);
           // userFeed.addActivity({
           //   actor: String(req.body.account_id),
           //   tweet: 'Hello world',
@@ -216,7 +216,7 @@ exports.follow = function(req, res) {
           //   object: 1
           // });
           // var userFlatFeed = stream.instantiateFeed('timeline', String(req.body.account_id));
-          // console.log(userFlatFeed);
+          // logger.info(userFlatFeed);
           // stream.follow('organization', req.body.organization_id);
 
           // Add the
@@ -298,9 +298,9 @@ exports.addImage = function(req,res) {
   models.organization.findById(req.params.id).then(function(organization) {
     if (!organization) { return res.json(organization); }
     models.image.create(req.body).then(function(image) {
-      console.log(image);
+      logger.info(image);
       organization.setLogo(image).then(function(result) {
-        console.log(result);
+        logger.info(result);
         return res.json(result);
       }).catch(function(error) {
         return handleError(res,error);

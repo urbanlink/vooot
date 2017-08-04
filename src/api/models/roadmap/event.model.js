@@ -55,9 +55,9 @@ module.exports = function(sequelize, DataTypes) {
 
   Event.hook('afterCreate', function(event, options) {
     sequelize.models.agenda.create({ event_id: event.id}).then(function(result){
-      console.log('Agenda created. ');
+      logger.info('Agenda created. ');
     }).catch(function(error){
-      console.log(error);
+      logger.info(error);
     });
   });
 
