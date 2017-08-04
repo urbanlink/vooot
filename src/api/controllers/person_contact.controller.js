@@ -15,7 +15,8 @@ function handleError(res, err) {
 // Add contact information to a person
 exports.create = function(req, res) {
   // create the new contact and add it to the person
-  models.person.findById(req.params.id).then(function(person) {
+  console.log(req.params);
+  models.person.findById(req.params.personId).then(function(person) {
     if (!person) { return res.json({ status: 'Person not found. '} ); }
     models.person_contact_type.findById(req.body.type_id).then(function(type) {
       if (!type) { return res.json({ status: 'Contact type not found '}); }

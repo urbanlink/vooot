@@ -14,8 +14,6 @@ function handleError(res, err) {
 // Add contact information to a person
 exports.create = function(req, res) {
   // create the new contact and add it to the person
-  models.person.findById(req.params.id).then(function(person) {
-    if (!person) { return res.json({ status: 'Person not found. '} ); }
     models.link.create({
       title: req.body.title,
       value: req.body.value,
@@ -28,9 +26,7 @@ exports.create = function(req, res) {
     }).catch(function(err) {
       return handleError(res, err);
     });
-  }).catch(function(err) {
-    return handleError(res, err);
-  });
+
 };
 
 // Update existing contact information

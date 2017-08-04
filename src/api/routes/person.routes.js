@@ -1,3 +1,9 @@
+
+// sanitize input
+  // validate permission
+    // validate input
+      // handleRequest
+
 'use strict';
 
 var express = require('express');
