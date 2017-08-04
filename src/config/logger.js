@@ -1,7 +1,8 @@
 var fs = require('fs');
 var path = require('path');
 var winston = require('winston');
-var logDir = path.join(__dirname, '../logs');
+var logDir = path.join(__dirname, '../../logs');
+
 winston.emitErrs = true;
 winston.setLevels(winston.config.syslog.levels);
 
@@ -14,7 +15,7 @@ var logger = new winston.Logger({
   transports: [
     new winston.transports.File({
       level: 'info',
-      filename: path.join(__dirname, '../logs/all.log'),
+      filename: path.join(logDir, '/all.log'),
       json: true,
       maxsize: 5242880, //5MB
       maxFiles: 100,
@@ -30,7 +31,7 @@ var logger = new winston.Logger({
   exceptionHandlers: [
     new winston.transports.Console({ json: false, timestamp: true }),
     new winston.transports.File({
-      filename: path.join(__dirname, '../logs/exceptions.log'),
+      filename: path.join(logDir, '/exceptions.log'),
       json: false
     })
   ],

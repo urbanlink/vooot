@@ -2,8 +2,8 @@
 
 var models = require('../models/index');
 var settings = require('../../config/settings');
-var path = require('path');
-var logger = require('winston');
+
+var logger = require('../../config/logger');
 
 // error handler
 function handleError(res, err) {

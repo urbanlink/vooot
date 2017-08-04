@@ -1,8 +1,9 @@
+// all validation, sanitation and authorization should be done before this point! (in permission.js and/or validator.js)
+
 'use strict';
 
 var models = require('../models/index');
 var settings = require('../../config/settings');
-var path = require('path');
 var logger = require('../../config/logger');
 
 
@@ -64,7 +65,7 @@ exports.query = function(req,res) {
 exports.show = function(req,res) {
   models.person.find({
     where: {
-      id: req.params.id
+      id: req.params.personId
     },
     include: [{
       // Person's identifiers
@@ -122,8 +123,6 @@ exports.show = function(req,res) {
   });
 };
 
-
-// POST
 // Create a person
 exports.create = function(req,res) {
   // Validate input
@@ -135,120 +134,11 @@ exports.create = function(req,res) {
   });
 };
 
-exports.addIdentifier = function(req, res) {
-  models.person.findById(req.params.id).then(function(person){
-    if (!person) { return res.json({ status: 'Person not found.'}); }
-    models.identifier.create({
-      value: req.body.value,
-      type_id: req.body.type_id,
-      person_id: req.params.id
-    }).then(function(result) {
-      logger.info('Identifier created. ');
-      return res.json(result);
-    }).catch(function(error) {
-      return handleError(res,error);
-    });
-  }).catch(function(error) {
-    return handleError(res,error);
-  });
-};
-
-exports.addName = function(req, res) {
-  // create the new name and add it to the person
-  models.person.findById(req.params.id).then(function(person) {
-    if (!person) { return res.json({ status: 'Person not found. '} ); }
-    models.person_othername_type.findById(req.body.type_id).then(function(type) {
-      if (!type) { return res.json({ status: 'Othername type not found '}); }
-      models.person_othername.create({
-        name: req.body.name,
-        type_id: req.body.type_id,
-        person_id: req.params.id
-      }).then(function(othername) {
-        logger.info('Othername created.');
-        return res.json(othername);
-      }).catch(function(err) {
-        return handleError(res, err);
-      });
-    }).catch(function(err) {
-      return res.handleError(res,err);
-    });
-  }).catch(function(err) {
-    return handleError(res, err);
-  });
-};
-
-exports.addContact = function(req, res) {
-  // create the new contact and add it to the person
-  models.person.findById(req.params.id).then(function(person) {
-    if (!person) { return res.json({ status: 'Person not found. '} ); }
-    models.person_contact_type.findById(req.body.type_id).then(function(type) {
-      if (!type) { return res.json({ status: 'Contact type not found '}); }
-      models.person_contact.create({
-        value: req.body.value,
-        type_id: req.body.type_id,
-        person_id: req.params.id
-      }).then(function(contact) {
-        logger.info('Contact created.');
-        return res.json(contact);
-      }).catch(function(err) {
-        return handleError(res, err);
-      });
-    }).catch(function(err) {
-      return res.handleError(res,err);
-    });
-  }).catch(function(err) {
-    return handleError(res, err);
-  });
-};
-
-exports.addLink = function(req, res) {
-  // create the new contact and add it to the person
-  models.person.findById(req.params.id).then(function(person) {
-    if (!person) { return res.json({ status: 'Person not found. '} ); }
-    models.link.create({
-      title: req.body.title,
-      value: req.body.value,
-      description: req.body.description,
-      category: req.body.category,
-      person_id: req.params.id
-    }).then(function(link) {
-      logger.info('Link created.');
-      return res.json(link);
-    }).catch(function(err) {
-      return handleError(res, err);
-    });
-  }).catch(function(err) {
-    return handleError(res, err);
-  });
-};
-exports.addJob = function(req, res) {
-  // create the new contact and add it to the person
-  models.person.findById(req.params.id).then(function(person) {
-    if (!person) { return res.json({ status: 'Person not found. '} ); }
-    models.person_job.create({
-      title: req.body.title,
-      description: req.body.description,
-      paid: req.body.paid,
-      startdate: req.body.startdate,
-      enddate: req.body.enddate,
-      person_id: req.params.id
-    }).then(function(result) {
-      logger.info('Job created.');
-      return res.json(result);
-    }).catch(function(err) {
-      return handleError(res, err);
-    });
-  }).catch(function(err) {
-    return handleError(res, err);
-  });
-};
-
-// PUT
 // Update a person record
 exports.update = function(req,res) {
-  logger.info('Updating person ' + req.params.id);
+  logger.info('Updating person ' + req.person.dataValues.id);
   models.person.update(req.body, {
-    where: { id: req.params.id }
+    where: { id: req.person.dataValues.id }
   }).then(function(result) {
     return res.json(result);
   }).catch(function(err){
@@ -256,14 +146,6 @@ exports.update = function(req,res) {
   });
 };
 
-exports.updateIdentifier =function(req,res) { };
-exports.updateName = function(req,res) { };
-exports.updateContact = function(req,res) { };
-exports.updateLink = function(req, res) { };
-exports.updateJob = function(req, res) { };
-
-
-// DELETE
 // Delete a person record
 exports.delete = function(req,res){
   models.person.destroy({
@@ -275,75 +157,9 @@ exports.delete = function(req,res){
   });
 };
 
-// Remove an identifier and remove it from a person
-exports.deleteIdentifier =function(req,res) {
-  logger.info('Removing identifier: ' + req.params.identifierId);
-  models.identifier.destroy({
-    where: {
-      id: req.params.identifierId
-    }
-  }).then(function(result) {
-    logger.info('Identifier desctroyed', result);
-    return res.json(result);
-  }).catch(function(error) {
-    return handleError(res,error);
-  });
-};
 
-exports.deleteName = function(req,res) {
-  logger.info('Removing name: ' + req.params);
-  logger.info('Removing name: ' + req.params.othernameId);
 
-  models.person_othername.destroy({
-    where: {
-      id: req.params.othernameId
-    }
-  }).then(function(result) {
-    logger.info('Othername deleted', result);
-    return res.json(result);
-  }).catch(function(error) {
-    return handleError(res,error);
-  });
-};
 
-exports.deleteContact = function(req,res) {
-  models.person_contact.destroy({
-    where: {
-      id: req.params.contactId
-    }
-  }).then(function(result) {
-    logger.info('Contact deleted', result);
-    return res.json(result);
-  }).catch(function(error) {
-    return handleError(res,error);
-  });
-};
-
-exports.deleteLink = function(req, res) {
-  models.link.destroy({
-    where: {
-      id: req.params.linkId
-    }
-  }).then(function(result) {
-    logger.info('Link deleted', result);
-    return res.json(result);
-  }).catch(function(error) {
-    return handleError(res,error);
-  });
-};
-
-exports.deleteJob = function(req, res) {
-  models.person_job.destroy({
-    where: {
-      id: req.params.jobId
-    }
-  }).then(function(result) {
-    logger.info('Job deleted', result);
-    return res.json(result);
-  }).catch(function(error) {
-    return handleError(res,error);
-  });
-};
 
 
 
