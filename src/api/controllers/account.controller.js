@@ -47,7 +47,7 @@ exports.register = function(req,res,next) {
 
 // Activate a user account based on activation key.
 exports.activate = function(req,res,next) {
-  var key = req.query.key;
+  var key = req.body.key;
   // find the user with the key
   models.account.findOne({
     where: {

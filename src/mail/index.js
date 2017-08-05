@@ -68,12 +68,15 @@ function afterRegistration(data) {
 
   var html = '';
   html += '<p>Welkom bij voOot!</p><br>';
-  html += '<p>Jouw account op vooot.nl is succesvol aangemaakt. Om gebruik te maken van voOot is activatie van je account nodig. Doe dit via deze button:</p>';
+  html += '<p>Jouw account op vooot.nl is succesvol aangemaakt. Om gebruik te maken van voOot is activatie van je account nodig. Doe dit door middel van de volgende key: </p>';
 
-  html += '<p style="text-align:center; margin:30px"><a href="'+settings.domain+'/account/activate?key=' + data.key + '" style="background-color:#1FC0B9;border:1px solid #333333;border-color:#1FC0B9;border-radius:2px;border-width:1px;color:#ffffff;display:inline-block;font-family:arial,helvetica,sans-serif;font-size:16px;font-weight:normal;letter-spacing:0px;line-height:16px;padding:12px 18px 12px 18px;text-align:center;text-decoration:none; target="_blank">Account activeren</a></p>';
+  // html += '<p style="text-align:center; margin:30px"><a href="'+settings.domain+'/account/activate?key=' + data.key + '" style="background-color:#1FC0B9;border:1px solid #333333;border-color:#1FC0B9;border-radius:2px;border-width:1px;color:#ffffff;display:inline-block;font-family:arial,helvetica,sans-serif;font-size:16px;font-weight:normal;letter-spacing:0px;line-height:16px;padding:12px 18px 12px 18px;text-align:center;text-decoration:none; target="_blank">Account activeren</a></p>';
 
-  html += '<p>Werkt bovenstaande knop niet? Kopieer dan deze link in je browser: <br><a href="'+settings.domain+'/account/activate?key=' + data.key + '">'+settings.domain+'/account/activate?key='+data.key+'</a><br>';
-  html += '<p>Of maak gebruik van de API met de activatiesleutel: ' + data.key + '</p>';
+  html += '<p style="text-align:center; margin:30px">'+ data.key + '</p>';
+  html += '<p>gebruik de API met een POST request naar /account/activate met bovenstaande key in de body.</p>';
+
+  // html += '<p>Werkt bovenstaande knop niet? Kopieer dan deze link in je browser: <br><a href="'+settings.domain+'/account/activate?key=' + data.key + '">'+settings.domain+'/account/activate?key='+data.key+'</a><br>';
+  // html += '<p>Of maak gebruik van de API met de activatiesleutel: ' + data.key + '</p>';
 
   out.html = html;
 
