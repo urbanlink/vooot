@@ -4,38 +4,62 @@ var express = require('express');
 var router = express.Router();
 var permission = require('./../permissions/account.permissions');
 var controller = require('./../controllers/account.controller');
-
+var auth = require('../../config/auth');
+var passport = require('passport');
 
 module.exports = function(app){
 
-  router.get('/:id',
-    permission.canView,
-    controller.show
+  // create a new account
+  router.post('/register',
+    controller.register
   );
 
-  router.post('/me',
-    permission.canView,
-    controller.me
+  // send username and password to receive accesstoken and refreshtoken
+  router.post('/login',
+    // First try to authenticate using passport
+    function(req,res,next) {
+      passport.authenticate('local', {
+        session: false
+      }, function(err, account,info){
+        if (err) { return res.json(err); }
+        req.user = account;
+        console.log(info);
+        next();
+        // next();
+      })(req,res,next);
+    },
+    // auth.authenticate,
+    // auth.serializeUser,
+    auth.serializeClient,
+    auth.generateAccessToken,
+    auth.generateRefreshToken,
+    function(req,res) {
+      return res.json({
+        user: req.user,
+        token: req.token
+      });
+    }
   );
 
-  // router.get('/',
-  //   permission.canView,
-  //   controller.index
-  // );
+  // Request a new access token by supplying a refreshtoken
+  router.post('/token',
+    auth.validateRefreshToken,
+    auth.generateAccessToken,
+    function(req,res) {
+      res.status(201).json({
+        token: req.token
+      });
+    }
+  );
 
-  // router.post('/sync',
-  //   permission.canCreate,
-  //   controller.sync
-  // );
+  router.post('/token/reject', auth.rejectToken);
 
-  // router.put('/:id',
-  //   permission.canUpdate,
-  //   controller.update
-  // );
-  // router.delete('/:id',
-  //   permission.canDelete,
-  //   controller.destroy
-  // );
+  // activate
+  router.post('/activate', controller.activate);
+  router.post('/activate/resend', controller.resendActivationKey);
+  router.post('/forgot-password', controller.forgotPassword);
+  router.post('/change-password', controller.changePassword);
+
 
   app.use('/account', router);
 };

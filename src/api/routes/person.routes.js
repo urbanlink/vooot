@@ -37,11 +37,9 @@ module.exports = function(app){
    *
    **/
   router.post('/',                      permission.canCreate, personCtrl.create );
-  router.post('/:personId/identifier',  permission.canUpdate, identifierCtrl.create );
-  router.post('/:personId/name',        permission.canUpdate, personOthernameCtrl.create );
-  router.post('/:personId/contact',     permission.canUpdate, personContactCtrl.create );
-  router.post('/:personId/link',        permission.canUpdate, linkCtrl.create );
-  router.post('/:personId/job',         permission.canUpdate, personJobCtrl.create);
+  router.post('/:personId/othername',   permission.canCreate, personOthernameCtrl.create );
+  router.post('/:personId/contact',     permission.canCreate, personContactCtrl.create );
+  router.post('/:personId/job',         permission.canCreate, personJobCtrl.create);
 
 
   /**
@@ -50,10 +48,8 @@ module.exports = function(app){
    *
    **/
   router.put('/:personId',            permission.canUpdate, personCtrl.update );
-  router.put('/:personId/identifier', permission.canUpdate, identifierCtrl.update );
-  router.put('/:personId/name',       permission.canUpdate, personOthernameCtrl.update );
+  router.put('/:personId/othername',  permission.canUpdate, personOthernameCtrl.update );
   router.put('/:personId/contact',    permission.canUpdate, personContactCtrl.update );
-  router.put('/:personId/link',       permission.canUpdate, linkCtrl.update );
   router.put('/:personId/job',        permission.canUpdate, personJobCtrl.update );
 
 
@@ -62,12 +58,10 @@ module.exports = function(app){
    *  DELETE requests for persons.
    *
    **/
-  router.delete('/:personId',                           permission.canDelete, personCtrl.delete );
-  router.delete('/:personId/identifier/:identifierId',  permission.canDelete, identifierCtrl.delete );
-  router.delete('/:personId/name/:othernameId',         permission.canDelete, personOthernameCtrl.delete );
-  router.delete('/:personId/contact/:contactId',        permission.canDelete, personContactCtrl.delete );
-  router.delete('/:personId/link/:linkId',              permission.canDelete, linkCtrl.delete );
-  router.delete('/:personId/job/:jobId',                permission.canDelete, personJobCtrl.delete );
+  router.delete('/:personId',                         permission.canDelete, personCtrl.delete );
+  router.delete('/:personId/othername/:othernameId',  permission.canDelete, personOthernameCtrl.delete );
+  router.delete('/:personId/contact/:contactId',      permission.canDelete, personContactCtrl.delete );
+  router.delete('/:personId/job/:jobId',              permission.canDelete, personJobCtrl.delete );
 
 
   // Add the person endpoint to the router.

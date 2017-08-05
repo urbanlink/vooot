@@ -2,114 +2,117 @@
 
 var models = require('../models/index');
 var settings = require('../../config/settings');
-
 var logger = require('../../config/logger');
+var utils = require('../utils');
+var bcrypt = require('bcrypt');
+var crypto = require('crypto');
+var mail = require('../../mail');
 
-// error handler
-function handleError(res, err) {
-  logger.debug('Error: ', err);
-  return res.status(500).json({status:'error', msg:err});
-}
+// Register a new user account
+exports.register = function(req,res,next) {
+  // parse input
+  var email = req.body.email;
+  var password = req.body.password;
+  if (!email || !password) {
+    return res.json({error: "Please, fill in all the fields."});
+  }
 
+  // Create the hashed password and salt
+  var salt = bcrypt.genSaltSync(10);
+  var hashedPassword = bcrypt.hashSync(password, salt);
 
-// Return currently logged in user
-exports.me = function(req,res) {
-
-};
-
-
-// File index
-exports.index = function(req,res) {
-  var limit = req.query.limit || 10;
-  if (limit > 50) { limit = 50; }
-  var offset = req.query.offset || 0;
-  var order = req.query.order || 'created_at DESC';
-  var filter = {};
-
-  models.account.findAll({
-    where: filter,
-    limit: limit,
-    offset: offset,
-    order: order
-  }).then(function(result) {
+  // Create the new account object
+  var newAccount = {
+    email: email,
+    salt: salt,
+    password: hashedPassword,
+    activationkey: utils.randomAsciiString(24),
+    verified: false
+  };
+  // Save the new account
+  models.account.create(newAccount).then(function(result) {
+    // Send welcome mail
+    mail.send({
+      template: 'afterRegistration',
+      to: email,
+      key: newAccount.activationkey
+    });
+    // return result
     return res.json(result);
-  }).catch(function(err){
-    return res.json({err:err});
-  });
-
-};
-
-
-// Find an account by id. Only for admins, auth0 and authenticated user account.
-exports.show = function(req,res) {
-  logger.info('Find user account: ' + req.params.id);
-  // models.account.findOne({
-  //   where: {
-  //     id: req.params.id,
-  //   },
-  //   include: [{
-  //     model: models.person,
-  //     through: models.person_editors,
-  //     as: 'persons'
-  //   }, {
-  //     model: models.event,
-  //     through: models.event_followers,
-  //     as: 'events'
-  //   }]
-  // }).then(function(account) {
-  //   // connect to stream.io
-  //   var userFeed = stream.feed('timeline_aggregated', account.dataValues.id);
-  //   // get activities from stream
-  //   userFeed.get({ limit: 100 }).then(function(stream) {
-  //     account.dataValues.userFeed = stream;
-  //   });
-  //
-  //
-  //   var notification_1 = stream.feed('notification', account.dataValues.id);
-  //   notification_1.get({'limit': 30}).then(function(result) {
-  //     logger.info('result', result);
-  //     account.dataValues.notification = result;
-  //     var timeline_1 = stream.feed('timeline', account.dataValues.id);
-  //     timeline_1.get({'limit': 30}).then(function(result) {
-  //       logger.info('result', result);
-  //       account.dataValues.stream = result;
-  //       return res.json(account);
-  //
-  //     }).catch(function(error) {
-  //       logger.info(error);
-  //       return res.json(account);
-  //     });
-  //   });
-  //
-  //   // return res.json(account);
-  // }).catch(function(error) {
-  //   return handleError(res,error);
-  // });
-};
-
-
-exports.create = function(req,res) {
-  models.user.create(req.body).then(function(result) {
-
-  }).catch(function(error){
-    logger.info(error);
+  }).catch(function(err) {
+    // something went wrong, handle error
+    utils.handleError(res,err);
   });
 };
 
-
-exports.update = function(req,res) {
-  models.user.create(req.body).then(function(result) {
-
-  }).catch(function(error){
-    logger.info(error);
+// Activate a user account based on activation key.
+exports.activate = function(req,res,next) {
+  var key = req.query.key;
+  // find the user with the key
+  models.account.findOne({
+    where: {
+      activationkey: key
+    }
+  }).then(function(result){
+    if(!result) { return res.json({msg: 'Key not found. '}); }
+    // key found, change verification status
+    result.updateAttributes({
+      verified: true,
+      activationkey: null
+    }).then(function(result) {
+      if (result.dataValues.verified===true) {
+        // send mail to the user
+        mail.send({
+          template: 'afterActivation',
+          to: result.dataValues.email
+        });
+      }
+      return res.json(result);
+    }).catch(function(err) {
+      return res.json(err);
+    });
+  }).catch(function(err) {
+    return res.json({msg: 'Error fetching key. '});
   });
 };
 
+// Send a new account activation key
+exports.resendActivationKey = function(req,res,next) {
+  var email = req.body.email;
 
-exports.destroy = function(req,res) {
-  models.user.create(req.body).then(function(result) {
-
-  }).catch(function(error){
-    logger.info(error);
+  models.account.findOne({
+    where: {
+      email:email,
+      verified: {
+        $or: {
+          $eq: null,
+          $ne: 1
+        }
+      }
+    }
+  }).then(function(account){
+    if (!account) {
+      return res.json({msg: 'Did not find account that needs verification. '});
+    }
+    account.updateAttributes({
+      activationkey: utils.randomAsciiString(24)
+    }).then(function(result) {
+      mail.send({
+        template: 'resendActivationKey',
+        to: account.dataValues.email,
+        key: account.dataValues.activationkey
+      });
+      return res.json({msg: 'email with activation code send.'});
+    });
+  }).catch(function(err) {
+    utils.handleError(res,err);
   });
+};
+
+//
+exports.forgotPassword = function(req,res,next) {  };
+
+//
+exports.changePassword = function(req, res, next) {
+
 };

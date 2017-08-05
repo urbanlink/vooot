@@ -9,10 +9,11 @@ try {
 
 module.exports = {
 
-  root          : path.normalize(__dirname + '/..'),
+  root : path.normalize(__dirname + '/..'),
 
-  environment   : process.env.NODE_ENV              || env.NODE_ENV                || 'development',
-  port          : process.env.NODE_API_PORT         || env.NODE_API_PORT           || 8000,
+  environment : process.env.NODE_ENV || env.NODE_ENV || 'development',
+  port : process.env.NODE_API_PORT || env.NODE_API_PORT || 8000,
+  domain : process.env.DOMAIN || env.DOMAIN || 'http://localhost:8000',
 
   db : {
     sync        : process.env.DATABASE_SYNC || env.DATABASE_SYNC || false,
@@ -40,7 +41,8 @@ module.exports = {
 
   jwt : {
     secret      : process.env.JWT_SECRET            || env.JWT_SECRET               || '12345',
-    session: process.env.JWT_SESSION || env.JWT_SESSION || 'false'
+    session     : process.env.JWT_SESSION   || env.JWT_SESSION   || 'false',
+    tokenTime   : process.env.JWT_TOKENTIME || env.JWT_TOKENTIME || 120 * 60
   },
 
   admin: {
@@ -48,13 +50,7 @@ module.exports = {
     email: 'arn@urbanlink.nl'
   },
 
-  sendgrid : {
-    key         : process.env.SENDGRID_API_KEY      || env.SENDGRID_API_KEY        || '',
-  },
-
-
-  // synchronization settings.
-  sync: {
-
+  mail : {
+    sendgridKey : process.env.SENDGRID_API_KEY || env.SENDGRID_API_KEY || '',
   }
 };

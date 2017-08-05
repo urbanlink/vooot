@@ -6,12 +6,10 @@ var methodOverride = require('method-override');
 var errorHandler = require('errorhandler');
 var cors = require('cors');
 var logger = require('./logger');
-var auth = require('./auth')();
-var passport = require("passport");
-var jwt = require('express-jwt');
+var expressJwt = require('express-jwt');
 var helmet = require('helmet');
-var permissions = require('./../api/permissions');
-console.log(permissions);
+var passport = require('passport');
+
 var settings = require('./settings');
 
 module.exports = function(app) {
@@ -19,7 +17,7 @@ module.exports = function(app) {
   var env = settings.environment;
 
   // Use helmet to secure Express headers
-  var SIX_MONTHS = 15778476000;
+  var SIX_MONTHS = 1000*60*60*24*31*6;
   app.use(helmet.frameguard());
   app.use(helmet.xssFilter());
   app.use(helmet.noSniff());
@@ -27,27 +25,32 @@ module.exports = function(app) {
   app.use(helmet.hsts({maxAge: SIX_MONTHS, includeSubdomains: true, force: true}));
   app.disable('x-powered-by');
 
+
   // Enable body parsing
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
+  app.use(passport.initialize());
+
 
   // Authenticate
-  // app.use(jwt({
-  //   secret: settings.jwt.secret,
-  //   strict: true
-  // })
-  // .unless({
-  //   path: [
-  //     '/',
-  //     '/account/login',
-  //     { url: '/account', methods: ['POST']  },
-  //     { url: '/person', methods: ['GET'] }
-  //   ]
-  // })
-  // );
-
-  // Validate permissions for each route request
-  // app.use(permissions.check);
+  app.use(expressJwt({
+    secret: settings.jwt.secret,
+    strict: true
+  })
+  .unless({
+    path: [
+      '/',
+      { url: '/account/login', methods: ['POST'] }, // Login an existing account
+      { url: '/account/register', methods: ['POST'] }, // Registere a new account
+      { url: '/account/activate', methods: ['POST'] },  // Activate a new account using a key
+      { url: '/account/activate/resend', methods: ['POST'] },  // Activate a new account using a key
+      { url: '/account/forgot-password', methods: ['POST'] },  // Activate a new account using a key
+      { url: '/account/change-password', methods: ['POST'] },  // Activate a new account using a key
+      { url: '/account/token', methods: ['POST'] },  // Get a new access token using a refresh token
+      // { url: '/account/token/reject', methods: ['POST'] }, // Refect an access token by the user
+    ]
+  })
+  );
 
   // return error message for unauthorized requests
   app.use(function (err, req, res, next) {

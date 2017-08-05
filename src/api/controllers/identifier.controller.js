@@ -3,7 +3,7 @@
 var models = require('../models/index');
 var settings = require('../../config/settings');
 var logger = require('../../config/logger');
-var utils = require('../utils/utils');
+var utils = require('../utils');
 
 
 // Create a new identifier
