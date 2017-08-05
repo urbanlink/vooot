@@ -28,7 +28,7 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: true
     },
 
-    resetPasswordkey: {
+    resetpasswordkey: {
         type: DataTypes.STRING,
         allowNull: true
     },

@@ -27,10 +27,17 @@ exports.send = function(data) {
     case 'resendActivationKey':
       templateContent = resendActivationKey(data);
       break;
+    case 'forgotPassword':
+      templateContent = forgotPassword(data);
+      break;
+    case 'afterPasswordChanged':
+      templateContent = afterPasswordChanged(data);
+      break;
     default:
       console.log('mail hook not found');
       return;
   }
+  console.log(templateContent);
   var subject = templateContent.subject || data.subject || 'Een bericht van voOot! ';
 
   var content = new helper.Content('text/html', templateContent.html);
@@ -106,9 +113,27 @@ function resendActivationKey(data) {
 }
 
 function forgotPassword(data) {
+  var out = {};
+  out.subject = "Wachtwoord wijzigen";
 
+  var html = '';
+  html += '<p>Er is een nieuw wachtwoord aangevraagd voor voOot. Doe dit via deze key:</p>';
+  html += '<p style="text-align:center; margin:30px">'+ data.key + '</p>';
+  html += '<p>gebruik de API met een POST request naar /account/change-password met bovenstaande key in de body.</p>';
+
+  out.html = html;
+
+  return out;
 }
 
 function afterPasswordChanged(data) {
+  var out = {};
+  out.subject = "Wachtwoord gewijzigd";
 
+  var html = '';
+  html += '<p>Je wachtwoord voor voOot is gewijzigd.</p>';
+
+  out.html = html;
+
+  return out;
 }

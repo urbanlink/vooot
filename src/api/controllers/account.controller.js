@@ -110,9 +110,63 @@ exports.resendActivationKey = function(req,res,next) {
 };
 
 //
-exports.forgotPassword = function(req,res,next) {  };
+exports.forgotPassword = function(req,res,next) {
+  var email = req.body.email;
+  // find the user with the key
+  models.account.findOne({
+    where: {
+      email: email
+    }
+  }).then(function(account) {
+    if(!account) { return res.json({msg: 'Account not found. '}); }
+    // key found, update resetpasswordkey
+    account.updateAttributes({
+      resetpasswordkey: utils.randomAsciiString(40)
+    }).then(function(result) {
+      // send mail to the user
+      mail.send({
+        template: 'forgotPassword',
+        to: result.dataValues.email,
+        key: result.dataValues.resetpasswordkey
+      });
+      return res.json(true);
+    }).catch(function(err) {
+      return res.json(err);
+    });
+  }).catch(function(err) {
+    return res.json({msg: 'Error fetching key. '});
+  });
+};
 
 //
 exports.changePassword = function(req, res, next) {
-
+  // validate input
+  var email = req.body.email;
+  var key = req.body.key;
+  var password = req.body.password;
+  // find account
+  models.account.findOne({where: {
+    email:email,
+    resetpasswordkey:key
+  }}).then(function(account) {
+    if (!account) { return res.json({msg: 'Account not found. '}); }
+    // Create the hashed password and salt
+    var salt = bcrypt.genSaltSync(10);
+    var hashedPassword = bcrypt.hashSync(password, salt);
+    account.updateAttributes({
+      resetpasswordkey: null,
+      salt: salt,
+      password: hashedPassword
+    }).then(function(result) {
+      mail.send({
+        template: 'afterPasswordChanged',
+        to: email
+      });
+      return res.json(true);
+    }).catch(function(err) {
+      utils.handleError(res,err);
+    });
+  }).catch(function(err) {
+    utils.handleError(res,err);
+  });
 };
