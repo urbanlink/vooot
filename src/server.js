@@ -24,6 +24,10 @@ require('./api/routes')(app);
 logger.info('Setting up database and models');
 var db = require('./api/models');
 
+// Setup permissions
+logger.info('Setting up permissions');
+var db = require('./api/permissions');
+
 // Start the server
 server.listen(settings.port, settings.ip, function () {
   logger.info('Express server listening on %d, in %s mode', settings.port, settings.environment);

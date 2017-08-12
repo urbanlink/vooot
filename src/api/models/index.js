@@ -42,9 +42,8 @@ sequelize.authenticate().then(function() {
       return true;
     });
   }
-
 }).catch(function(err) {
-  logger.info('Unable to connect to the database:', err);
+  logger.debug('Unable to connect to the database:', err);
 });
 
 

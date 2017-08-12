@@ -5,9 +5,20 @@ var settings = require('../../config/settings');
 var logger = require('../../config/logger');
 
 
-// SANITIZE
+exports.isPersonId = function(req,res,next) {
+  if (req.params.personId) {
+    req.checkParams('personId', 'Invalid urlparam').isInt();
+  }
+  //
+  req.getValidationResult().then(function(result) {
+    if (!result.isEmpty()) {
+      return res.json(result.array());
+    }
+    next();
+  });
+};
 
-// VALIDATE
+
 // Check if the requested person exists in the database
 exports.isPerson = function(req,res,next) {
   if (req.person) { return true; }

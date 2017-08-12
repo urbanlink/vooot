@@ -3,6 +3,7 @@
 var models = require('../models/index');
 var settings = require('../../config/settings');
 
+
 exports.canView = function(req,res,next) {
   next();
 };

@@ -8,6 +8,12 @@ var bcrypt = require('bcrypt');
 var crypto = require('crypto');
 var mail = require('../../mail');
 
+
+/********
+ *
+ * ACCOUNT REGISTRATION AND HELPER FUNCTIONS
+ *
+ ********/
 // Register a new user account
 exports.register = function(req,res,next) {
   // parse input
@@ -38,7 +44,7 @@ exports.register = function(req,res,next) {
       key: newAccount.activationkey
     });
     // return result
-    return res.json(result);
+    return res.json({ msg: 'Account created successfully. Mail with activation code sent by mail. '});
   }).catch(function(err) {
     // something went wrong, handle error
     utils.handleError(res,err);
@@ -67,7 +73,7 @@ exports.activate = function(req,res,next) {
           to: result.dataValues.email
         });
       }
-      return res.json(result);
+      return res.json({ msg: 'Account activated. '});
     }).catch(function(err) {
       return res.json(err);
     });
@@ -169,4 +175,100 @@ exports.changePassword = function(req, res, next) {
   }).catch(function(err) {
     utils.handleError(res,err);
   });
+};
+
+
+/********
+ *
+ * ROLE FUNCTIONS
+ *
+ ********/
+// Send a list of account role types (id's and value).
+exports.roleTypes = function(req, res, next) {
+  return res.json({
+    accountRoles: {
+      1: 'administrator',
+      2: 'editor'
+    }
+  });
+};
+
+// Add a role to a user account
+exports.addRole = function(req, res, next) {
+  models.account.findById(req.user.id).then(function(account) {
+    if (!account) { return res.json({msg: 'Account not found. Association not created. '}); }
+    models.account_role_type.findById(req.body.role_id).then(function(role) {
+      if (!role) { return res.json({msg: 'Role not found. Association not created. '}); }
+      // console.log(role);
+      account.addRole().then(function(result) {
+        console.log(result);
+        return res.json(result);
+      }).catch(function(err){
+        console.log('errr', err);
+        utils.handleError(res,err);
+      });
+    }).catch(function(err) {
+      utils.handleError(res,err);
+    });
+  });
+};
+
+// Delete a role from a user account
+exports.deleteRole = function(req,res,next) {
+  models.account_role.destroy({ where: { account_id: req.user.id, role_id: req.body.role_id } }).then(function(result) {
+    return res.json(result);
+  }).catch(function(err){
+    return res.json(err);
+  });
+};
+
+
+
+/********
+ *
+ * PROFILE FUNCTIONS
+ *
+ ********/
+// Get account and profile of current uer
+exports.me = function(req,res,next) {
+  if (req.user && req.user.id) {
+
+    models.account.findOne({
+      where: {
+        id: req.user.id
+      },
+      attributes: ['id', 'email', 'picture', 'name'],
+      // include roles
+      include: [{
+        model: models.account_role,
+        as: 'roles',
+        attributes: ['type_id']
+      }]
+    }).then(function(result) {
+
+      // add user_id and client_id to the request header
+      var account = result.dataValues;
+      account.profile = {
+        picture: account.picture,
+        name: account.name
+      };
+      delete account.picture;
+      delete account.name;
+
+      var roles = account.roles;
+      account.roles = [];
+
+      req.user = {};
+      for (var i=0; i<roles.length;i++) {
+        account.roles.push(roles[ i].dataValues.type_id);
+      }
+
+      return res.json(account);
+    }).catch(function(err) {
+      return res.json(err);
+    });
+  }
+  else {
+    return res.json({msg: 'Account not found.'});
+  }
 };

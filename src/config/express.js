@@ -9,6 +9,7 @@ var logger = require('./logger');
 var expressJwt = require('express-jwt');
 var helmet = require('helmet');
 var passport = require('passport');
+var expressValidator = require('express-validator');
 
 var settings = require('./settings');
 
@@ -29,6 +30,8 @@ module.exports = function(app) {
   // Enable body parsing
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
+  app.use(expressValidator()); // this line must be immediately after any of the bodyParser middlewares!
+
   app.use(passport.initialize());
 
 
@@ -68,15 +71,10 @@ module.exports = function(app) {
   });
 
   if ('production' === env) {
-    //app.use(express.static(path.join(settings.root, 'public')));
-    //app.set('appPath', settings.root + '/public');
+
   }
 
   if ('development' === env || 'test' === env) {
-    //app.use(require('connect-livereload')());
-    //app.use(express.static(path.join(config.root, '.tmp')));
-    //app.use(express.static(path.join(config.root, 'client')));
-    //app.set('appPath', 'client');
     app.use(errorHandler()); // Error handler - has to be last
   }
 

@@ -51,6 +51,10 @@ module.exports = function(sequelize, DataTypes) {
       as:'clients'
     });
 
+    // account roles
+    Model.hasMany(models.account_role, {
+      as:'roles'
+    });
 
 
     // // An account can follow multiple persons, and a person can be followed by multiple accounts (many-to-many)

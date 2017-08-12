@@ -1,9 +1,9 @@
 'use strict';
 
-// Dependencies
 var helper = require('sendgrid').mail;
 var settings = require('../config/settings');
 var sendgrid = require("sendgrid")(settings.mail.sendgridKey);
+
 
 exports.send = function(data) {
 
@@ -60,6 +60,7 @@ exports.send = function(data) {
   });
 };
 
+// MAIL TEMPLATES
 // Sending an email after registration. Welcome and activationlink
 function afterRegistration(data) {
 
@@ -73,7 +74,7 @@ function afterRegistration(data) {
   // html += '<p style="text-align:center; margin:30px"><a href="'+settings.domain+'/account/activate?key=' + data.key + '" style="background-color:#1FC0B9;border:1px solid #333333;border-color:#1FC0B9;border-radius:2px;border-width:1px;color:#ffffff;display:inline-block;font-family:arial,helvetica,sans-serif;font-size:16px;font-weight:normal;letter-spacing:0px;line-height:16px;padding:12px 18px 12px 18px;text-align:center;text-decoration:none; target="_blank">Account activeren</a></p>';
 
   html += '<p style="text-align:center; margin:30px">'+ data.key + '</p>';
-  html += '<p>gebruik de API met een POST request naar /account/activate met bovenstaande key in de body.</p>';
+  html += '<p>Gebruik de API met een POST request naar /account/activate met bovenstaande key in de body.</p>';
 
   // html += '<p>Werkt bovenstaande knop niet? Kopieer dan deze link in je browser: <br><a href="'+settings.domain+'/account/activate?key=' + data.key + '">'+settings.domain+'/account/activate?key='+data.key+'</a><br>';
   // html += '<p>Of maak gebruik van de API met de activatiesleutel: ' + data.key + '</p>';
@@ -83,6 +84,7 @@ function afterRegistration(data) {
   return out;
 }
 
+//
 function afterActivation(data) {
   var out = {};
   out.subject = "Je account bij voOot is geactiveerd!";
@@ -91,30 +93,35 @@ function afterActivation(data) {
   html += '<p>Welkom bij voOot!</p><br>';
   html += '<p>Jouw account op vooot.nl is geactiveerd. Je kunt nu inloggen en gebruik maken van voOot! </p>';
 
-  html += '<p style="text-align:center; margin:30px"><a href="'+settings.domain+'" style="background-color:#1FC0B9;border:1px solid #333333;border-color:#1FC0B9;border-radius:2px;border-width:1px;color:#ffffff;display:inline-block;font-family:arial,helvetica,sans-serif;font-size:16px;font-weight:normal;letter-spacing:0px;line-height:16px;padding:12px 18px 12px 18px;text-align:center;text-decoration:none; target="_blank">Naar voOot</a></p>';
+  // html += '<p style="text-align:center; margin:30px"><a href="'+settings.domain+'" style="background-color:#1FC0B9;border:1px solid #333333;border-color:#1FC0B9;border-radius:2px;border-width:1px;color:#ffffff;display:inline-block;font-family:arial,helvetica,sans-serif;font-size:16px;font-weight:normal;letter-spacing:0px;line-height:16px;padding:12px 18px 12px 18px;text-align:center;text-decoration:none; target="_blank">Naar voOot</a></p>';
 
   out.html = html;
 
   return out;
 }
 
+//
 function resendActivationKey(data) {
   var out = {};
   out.subject = "Nieuwe activatie code";
 
   var html = '';
-  html += '<p>Er is een nieuwe activatie-code aangevraagd voor voOot. Doe dit via deze button:</p>';
+  html += '<p>Er is een nieuwe activatie-code aangevraagd voor voOot. Doe dit door middel van de volgende key: :</p>';
 
-  html += '<p style="text-align:center; margin:30px"><a href="'+settings.domain+'/account/activate?key=' + data.key + '" style="background-color:#1FC0B9;border:1px solid #333333;border-color:#1FC0B9;border-radius:2px;border-width:1px;color:#ffffff;display:inline-block;font-family:arial,helvetica,sans-serif;font-size:16px;font-weight:normal;letter-spacing:0px;line-height:16px;padding:12px 18px 12px 18px;text-align:center;text-decoration:none; target="_blank">Account activeren</a></p>';
+  // html += '<p style="text-align:center; margin:30px"><a href="'+settings.domain+'/account/activate?key=' + data.key + '" style="background-color:#1FC0B9;border:1px solid #333333;border-color:#1FC0B9;border-radius:2px;border-width:1px;color:#ffffff;display:inline-block;font-family:arial,helvetica,sans-serif;font-size:16px;font-weight:normal;letter-spacing:0px;line-height:16px;padding:12px 18px 12px 18px;text-align:center;text-decoration:none; target="_blank">Account activeren</a></p>';
 
-  html += '<p>Werkt bovenstaande knop niet? Kopieer dan deze link in je browser: <br><a href="'+settings.domain+'/account/activate?key=' + data.key + '">'+settings.domain+'/account/activate?key='+data.key+'</a><br>';
-  html += '<p>Of maak gebruik van de API met de activatiesleutel: ' + data.key + '</p>';
+  html += '<p style="text-align:center; margin:30px">' + data.key + '</p>';
+  html += '<p>Gebruik de API met een POST request naar /account/activate met bovenstaande key in de body.</p>';
+
+  // html += '<p>Werkt bovenstaande knop niet? Kopieer dan deze link in je browser: <br><a href="'+settings.domain+'/account/activate?key=' + data.key + '">'+settings.domain+'/account/activate?key='+data.key+'</a><br>';
+  // html += '<p>Of maak gebruik van de API met de activatiesleutel: ' + data.key + '</p>';
 
   out.html = html;
 
   return out;
 }
 
+//
 function forgotPassword(data) {
   var out = {};
   out.subject = "Wachtwoord wijzigen";
@@ -129,6 +136,7 @@ function forgotPassword(data) {
   return out;
 }
 
+//
 function afterPasswordChanged(data) {
   var out = {};
   out.subject = "Wachtwoord gewijzigd";

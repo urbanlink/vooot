@@ -2,42 +2,53 @@
 
 var models = require('../models/index');
 var settings = require('../../config/settings');
+var auth = require('../../config/auth');
 
 exports.canView = function(req,res,next) {
   next();
 };
 
+
+/**
+ *
+ * Check if current user can create a new Person
+ *
+ **/
 exports.canCreate = function(req,res,next) {
-  next();
+  if (auth.isAdmin(req.user) || auth.isEditor(req.user) ){
+    return next();
+  }
+
+  return req.json({status:'no access'});
 };
 
+
+/**
+ *
+ * Check if current user can update a Person
+ *
+ */
 exports.canUpdate = function(req,res,next) {
-  // Todo: Validate user access
+  console.log('Checking can update');
+  console.log(req.user);
+  if (auth.isAdmin(req.user) || auth.isEditor(req.user) ){
+    console.log('yyy');
+    return next();
+  }
 
-  // Todo: validate if current user can update the requested person
-
-  // Add requested person to request
-  models.person.findById(req.params.personId).then(function(person) {
-    if (!person) { return res.json({status: 'Person not found. '}); }
-    req.person = person;
-    next();
-  }).catch(function(err) {
-    return res.status(500).json({err: err});
-  });
-
+  return req.json({status:'no access'});
 };
 
+
+/**
+ *
+ * Check if current user can delete a Person
+ *
+ */
 exports.canDelete = function(req,res,next) {
-  // Todo: Validate user access
+  if (auth.isAdmin() || auth.isEditor() ){
+    return next();
+  }
 
-  // Todo: validate if current user can update the requested person
-
-  // Add requested person to request
-  models.person.findById(req.params.personId).then(function(person) {
-    if (!person) { return res.json({status: 'Person not found. '}); }
-    req.person = person;
-    next();
-  }).catch(function(err) {
-    return res.status(500).json({err: err});
-  });
+  return req.json({status:'no access'});
 };

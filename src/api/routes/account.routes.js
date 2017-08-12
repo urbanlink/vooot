@@ -2,16 +2,20 @@
 
 var express = require('express');
 var router = express.Router();
-var permission = require('./../permissions/account.permissions');
-var controller = require('./../controllers/account.controller');
-var auth = require('../../config/auth');
 var passport = require('passport');
+
+var auth = require('../../config/auth');
+var acl = require('./../permissions');
+var validator = require('../validators');
+var controller = require('./../controllers');
+
+
 
 module.exports = function(app){
 
   // create a new account
   router.post('/register',
-    controller.register
+    controller.account.register
   );
 
   // send username and password to receive accesstoken and refreshtoken
@@ -20,16 +24,12 @@ module.exports = function(app){
     function(req,res,next) {
       passport.authenticate('local', {
         session: false
-      }, function(err, account,info){
+      }, function(err, account){
         if (err) { return res.json(err); }
         req.user = account;
-        console.log(info);
         next();
-        // next();
       })(req,res,next);
     },
-    // auth.authenticate,
-    // auth.serializeUser,
     auth.serializeClient,
     auth.generateAccessToken,
     auth.generateRefreshToken,
@@ -47,7 +47,8 @@ module.exports = function(app){
     auth.generateAccessToken,
     function(req,res) {
       res.status(201).json({
-        token: req.token
+        token: req.token,
+        user: req.user
       });
     }
   );
@@ -55,11 +56,28 @@ module.exports = function(app){
   router.post('/token/reject', auth.rejectToken);
 
   // activate
-  router.post('/activate', controller.activate);
-  router.post('/activate/resend', controller.resendActivationKey);
-  router.post('/forgot-password', controller.forgotPassword);
-  router.post('/change-password', controller.changePassword);
+  router.post('/activate', controller.account.activate);
+  router.post('/activate/resend', controller.account.resendActivationKey);
+  router.post('/forgot-password', controller.account.forgotPassword);
+  router.post('/change-password', controller.account.changePassword);
 
+  // Account roles
+  router.get( '/role-types', controller.account.roleTypes );
+  router.post( '/:accountId/role',
+    validator.areParamsInt,
+    validator.account.isRoleInt,
+    acl.account.canUpdate,
+    controller.account.addRole
+  );
+  router.delete( '/:accountId/role',
+    validator.areParamsInt,
+    acl.account.canUpdate,
+    controller.account.deleteRole
+  );
+
+  router.post('/me',
+    controller.account.me
+  );
 
   app.use('/account', router);
 };
