@@ -22,6 +22,14 @@ A feed of site activity is also available as a general API in Atom, RSS, and oth
 ## References
 webcal://www.meetup.com/events/ical/46045772/bbb52d93e61ae0e6100219a8b7fc9cdaddf625c4/going
 
+### Example applications
 http://sabre.io
 https://github.com/smallpath/node-caldav-server
 https://github.com/LordEidi/fennel
+
+### Tutorials
+http://geekswithblogs.net/shaunxu/archive/2016/03/18/implement-ical-subscription-service-through-in-node.js.aspx
+
+### References
+https://icalendar.org
+https://icalendar.org/validator.html

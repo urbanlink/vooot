@@ -51,6 +51,7 @@ module.exports = function(app) {
       { url: '/account/change-password', methods: ['POST'] },  // Activate a new account using a key
       { url: '/account/token', methods: ['POST'] },  // Get a new access token using a refresh token
       // { url: '/account/token/reject', methods: ['POST'] }, // Refect an access token by the user
+      { url: '/event/calendar', methods: ['GET'] },  // Get a new access token using a refresh token
     ]
   })
   );

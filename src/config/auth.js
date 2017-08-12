@@ -194,7 +194,7 @@ exports.rejectToken = function(req, res, next) {
 
 exports.isAdmin = function(account) {
   console.log(account);
-  if (account.roles.indexOf(1) !== -1) {
+  if ( account && (account.roles.indexOf(1) !== -1) ) {
     return true;
   }
   return false;
