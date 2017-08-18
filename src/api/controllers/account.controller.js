@@ -229,7 +229,7 @@ exports.deleteRole = function(req,res,next) {
  * PROFILE FUNCTIONS
  *
  ********/
-// Get account and profile of current uer
+// Get profile of current uer
 exports.me = function(req,res,next) {
   if (req.user && req.user.id) {
 
@@ -248,7 +248,7 @@ exports.me = function(req,res,next) {
 
       // add user_id and client_id to the request header
       var account = result.dataValues;
-      account.profile = {
+      var profile = {
         picture: account.picture,
         name: account.name
       };
@@ -263,7 +263,10 @@ exports.me = function(req,res,next) {
         account.roles.push(roles[ i].dataValues.type_id);
       }
 
-      return res.json(account);
+      return res.json({
+        account: account,
+        profile:profile
+      });
     }).catch(function(err) {
       return res.json(err);
     });

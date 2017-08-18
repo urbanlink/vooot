@@ -19,7 +19,7 @@ exports.create = function(req, res) {
       value: req.body.value,
       description: req.body.description,
       category: req.body.category,
-      person_id: req.params.personId
+      person_id: req.body.person_id
     }).then(function(link) {
       logger.info('Link created.');
       return res.json(link);

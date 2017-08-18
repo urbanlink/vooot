@@ -136,9 +136,9 @@ exports.create = function(req,res) {
 
 // Update a person record
 exports.update = function(req,res) {
-  logger.info('Updating person ' + req.person.dataValues.id);
+  logger.info('Updating person ' + req.body);
   models.person.update(req.body, {
-    where: { id: req.person.dataValues.id }
+    where: { id: req.body.id }
   }).then(function(result) {
     return res.json(result);
   }).catch(function(err){

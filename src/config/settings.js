@@ -16,15 +16,15 @@ module.exports = {
   domain : process.env.DOMAIN || env.DOMAIN || 'http://localhost:8000',
 
   db : {
-    sync        : process.env.DATABASE_SYNC || env.DATABASE_SYNC || false,
-    forceSync   : process.env.DATABASE_FORCE_SYNC || env.DATABASE_FORCE_SYNC || false,
-    name        : process.env.DATABASE_NAME         || env.DATABASE_NAME           || 'database',
-    username    : process.env.DATABASE_USERNAME     || env.DATABASE_USERNAME       || 'username',
-    password    : process.env.DATABASE_PASSWORD     || env.DATABASE_PASSWORD       || 'password',
-    port        : process.env.DATABASE_PORT         || env.DATABASE_PORT           || '3306',
+    sync: process.env.DATABASE_SYNC || env.DATABASE_SYNC || false,
+    forceSync: process.env.DATABASE_FORCE_SYNC || env.DATABASE_FORCE_SYNC || false,
+    name: process.env.DATABASE_NAME || env.DATABASE_NAME || 'database',
+    username: process.env.DATABASE_USERNAME || env.DATABASE_USERNAME || 'username',
+    password: process.env.DATABASE_PASSWORD || env.DATABASE_PASSWORD || 'password',
+    port: process.env.DATABASE_PORT || env.DATABASE_PORT || '3306',
     settings: {
-      host        : process.env.DATABASE_HOST         || env.DATABASE_HOST           || 'localhost',
-      dialect     : process.env.DATABASE_DIALECT      || env.DATABASE_DIALECT        || 'mysql',
+      host: process.env.DATABASE_HOST || env.DATABASE_HOST || 'localhost',
+      dialect: process.env.DATABASE_DIALECT      || env.DATABASE_DIALECT        || 'mysql',
       pool: {
         max: 5,
         min: 0,
@@ -40,9 +40,9 @@ module.exports = {
   },
 
   jwt : {
-    secret      : process.env.JWT_SECRET            || env.JWT_SECRET               || '12345',
-    session     : process.env.JWT_SESSION   || env.JWT_SESSION   || 'false',
-    tokenTime   : process.env.JWT_TOKENTIME || env.JWT_TOKENTIME || 120 * 60
+    secret: process.env.JWT_SECRET || env.JWT_SECRET || '12345',
+    session: process.env.JWT_SESSION || env.JWT_SESSION || 'false',
+    tokenTime: process.env.JWT_TOKENTIME || env.JWT_TOKENTIME || 120 * 60
   },
 
   admin: {

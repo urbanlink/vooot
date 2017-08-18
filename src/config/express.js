@@ -26,6 +26,7 @@ module.exports = function(app) {
   app.use(helmet.hsts({maxAge: SIX_MONTHS, includeSubdomains: true, force: true}));
   app.disable('x-powered-by');
 
+  app.use(cors());
 
   // Enable body parsing
   app.use(bodyParser.urlencoded({ extended: true }));

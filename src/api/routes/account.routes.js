@@ -22,11 +22,14 @@ module.exports = function(app){
   router.post('/login',
     // First try to authenticate using passport
     function(req,res,next) {
+      console.log('req.body:', req.body);
       passport.authenticate('local', {
         session: false
       }, function(err, account){
-        if (err) { return res.json(err); }
+        if (err) { return res.status(403).json(err); }
+        if (!account) { return res.status(403).json('Account not found. '); }
         req.user = account;
+        console.log(account);
         next();
       })(req,res,next);
     },
@@ -35,7 +38,7 @@ module.exports = function(app){
     auth.generateRefreshToken,
     function(req,res) {
       return res.json({
-        user: req.user,
+        account: req.user,
         token: req.token
       });
     }

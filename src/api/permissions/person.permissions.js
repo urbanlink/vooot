@@ -29,13 +29,9 @@ exports.canCreate = function(req,res,next) {
  *
  */
 exports.canUpdate = function(req,res,next) {
-  console.log('Checking can update');
-  console.log(req.user);
   if (auth.isAdmin(req.user) || auth.isEditor(req.user) ){
-    console.log('yyy');
     return next();
   }
-
   return req.json({status:'no access'});
 };
 
@@ -46,9 +42,9 @@ exports.canUpdate = function(req,res,next) {
  *
  */
 exports.canDelete = function(req,res,next) {
-  if (auth.isAdmin() || auth.isEditor() ){
+  if (auth.isAdmin(req.user) || auth.isEditor(req.user) ){
     return next();
   }
 
-  return req.json({status:'no access'});
+  return res.json({status:'no access'});
 };

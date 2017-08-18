@@ -14,3 +14,21 @@ module.exports = function(sequelize, DataTypes) {
 
   return Model;
 };
+
+
+/**
+  Contact types:
+    1 address_work
+    2 address_home
+
+    3 phone
+    4 phone_mobile
+
+    5 email_work
+    6 email_home
+
+    7 twitter
+    8 facebook
+    9 linkedin
+    10 instagram
+  */

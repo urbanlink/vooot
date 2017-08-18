@@ -37,9 +37,7 @@ passport.use(new LocalStrategy(
         attributes: ['type_id']
       }]
     }).then(function(account) {
-      // console.log(account.dataValues);
       if (!account) { return done({ msg: 'Account not found.'}, false); }
-
       var hashedPassword = bcrypt.hashSync(password, account.dataValues.salt);
       if (account.dataValues.password === hashedPassword) {
         if (account.dataValues.verified!==true) {
