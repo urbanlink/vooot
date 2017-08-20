@@ -15,19 +15,12 @@ module.exports = function(app){
    *  GET requests for persons.
    *
    **/
-  router.get( '/',
-    acl.person.canView,
-    controller.person.index
-  );
-  router.get('/query',
-    acl.person.canView,
-    controller.person.query
-  );
-  router.get('/:personId',
-    validator.areParamsInt,
-    acl.person.canView,
-    controller.person.show
-  );
+  router.get( '/', acl.person.canView, controller.person.index );
+  router.get( '/query', acl.person.canView, controller.person.query );
+
+  router.get( '/contact-types', controller.person_contact.types );
+
+  router.get('/:personId', validator.areParamsInt, acl.person.canView, controller.person.show );
 
 
   /**

@@ -11,6 +11,13 @@ function handleError(res, err) {
   return res.status(500).json({status:'error', msg:err});
 }
 
+exports.types = function(req,res) {
+  models.person_contact_type.findAll().then(function(result) {
+    return res.json(result);
+  }).catch(function(err) {
+    return handleError(res,err);
+  });
+};
 
 // Add contact information to a person
 exports.create = function(req, res) {

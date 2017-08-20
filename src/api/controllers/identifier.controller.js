@@ -6,6 +6,15 @@ var logger = require('../../config/logger');
 var utils = require('../utils');
 
 
+exports.types = function(req,res) {
+  models.identifier_type.findAll().then(function(result) {
+    return res.json(result);
+  }).catch(function(err) {
+    return utils.handleError(res,err);
+  });
+};
+
+
 // Create a new identifier
 exports.create = function(req, res) {
   // if validator.isPerson() && validator.isIdentifierType()
