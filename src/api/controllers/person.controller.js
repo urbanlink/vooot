@@ -128,7 +128,7 @@ exports.create = function(req,res) {
   // Validate input
 
   models.person.create(req.body).then(function(result) {
-    return res.json(result.dataValues.id);
+    return res.json(result);
   }).catch(function(err) {
     return handleError(res,err);
   });
@@ -136,9 +136,9 @@ exports.create = function(req,res) {
 
 // Update a person record
 exports.update = function(req,res) {
-  logger.info('Updating person ' + req.body);
+  logger.info('Updating person ', req.params.personId, req.body);
   models.person.update(req.body, {
-    where: { id: req.body.id }
+    where: { id: req.params.personId }
   }).then(function(result) {
     return res.json(result);
   }).catch(function(err){

@@ -31,7 +31,17 @@ exports.create = function(req, res) {
 };
 
 // Update an identifier
-exports.update = function(req,res) { };
+exports.update = function(req,res) {
+  logger.info('Updating identrifier ' + req.params.identifierId, req.body);
+
+  models.identifier.update(req.body, {
+    where: { id: req.params.identifierId }
+  }).then(function(result) {
+    return res.json(result);
+  }).catch(function(err){
+    return utils.handleError(res,err);
+  });
+};
 
 // Remove an identifier
 exports.delete = function(req,res) {
