@@ -35,7 +35,7 @@ module.exports = function(app) {
 
   app.use(passport.initialize());
 
-
+  console.log(settings.jwt);
   // Authenticate
   app.use(expressJwt({
     secret: settings.jwt.secret,

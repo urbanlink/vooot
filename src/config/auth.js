@@ -179,6 +179,7 @@ exports.validateRefreshToken = function(req, res, next) {
   });
 };
 
+
 exports.rejectToken = function(req, res, next) {
   models.account_authclient.destroy({
     where: {
@@ -191,12 +192,11 @@ exports.rejectToken = function(req, res, next) {
 
 
 exports.isAdmin = function(account) {
-  console.log(account);
-  if ( account && (account.roles.indexOf(1) !== -1) ) {
-    return true;
-  }
-  return false;
+  console.log('Validating isAdmin');
+  console.log(account.roles.indexOf(1));
+  return ( account && (account.roles.indexOf(1) !== -1) );
 };
+
 
 exports.isEditor = function(account) {
 

@@ -15,12 +15,12 @@ module.exports = function(app){
    *  GET requests for persons.
    *
    **/
-  router.get( '/', acl.person.canView, controller.person.index );
-  router.get( '/query', acl.person.canView, controller.person.query );
+  router.get( '/', acl.canView, controller.person.index );
+  router.get( '/query', acl.canView, controller.person.query );
 
   router.get( '/contact-types', controller.person_contact.types );
 
-  router.get('/:personId', validator.areParamsInt, acl.person.canView, controller.person.show );
+  router.get('/:personId', validator.areParamsInt, acl.canView, controller.person.show );
 
 
   /**
@@ -29,22 +29,22 @@ module.exports = function(app){
    *
    **/
   router.post('/',
-    acl.person.canCreate,
+    acl.canCreate,
     controller.person.create
   );
   router.post('/:personId/othername',
     validator.areParamsInt,
-    acl.person.canUpdate,
+    acl.canUpdate,
     controller.person_othername.create
   );
   router.post('/:personId/contact',
     validator.areParamsInt,
-    acl.person.canUpdate,
+    acl.canUpdate,
     controller.person_contact.create
   );
   router.post('/:personId/job',
     validator.areParamsInt,
-    acl.person.canUpdate,
+    acl.canUpdate,
     controller.person_job.create
   );
 
@@ -56,22 +56,22 @@ module.exports = function(app){
    **/
   router.put('/:personId',
     validator.areParamsInt,
-    acl.person.canUpdate,
+    acl.canUpdate,
     controller.person.update
   );
   router.put('/:personId/othername',
     validator.areParamsInt,
-    acl.person.canUpdate,
+    acl.canUpdate,
     controller.person_othername.update
   );
   router.put('/:personId/contact',
     validator.areParamsInt,
-    acl.person.canUpdate,
+    acl.canUpdate,
     controller.person_contact.update
   );
   router.put('/:personId/job',
     validator.areParamsInt,
-    acl.person.canUpdate,
+    acl.canUpdate,
     controller.person_job.update
   );
 
@@ -83,22 +83,22 @@ module.exports = function(app){
    **/
   router.delete('/:personId',
     validator.areParamsInt,
-    acl.person.canDelete,
+    acl.canDelete,
     controller.person.delete
   );
   router.delete('/:personId/othername/:othernameId',
     validator.areParamsInt,
-    acl.person.canUpdate,
+    acl.canUpdate,
     controller.person_othername.delete
   );
   router.delete('/:personId/contact/:contactId',
     validator.areParamsInt,
-    acl.person.canUpdate,
+    acl.canUpdate,
     controller.person_contact.delete
   );
   router.delete('/:personId/job/:jobId',
     validator.areParamsInt,
-    acl.person.canUpdate,
+    acl.canUpdate,
     controller.person_job.delete
   );
 
