@@ -38,7 +38,7 @@ sequelize.authenticate().then(function() {
   if (settings.db.sync === 'true') {
     sequelize.sync({ force: settings.db.forceSync }).then(function(result) {
       // Seed the database
-      // require(path.join(__dirname, '../../db/seed')).seed();
+      require(path.join(__dirname, '../../../db/seeders/seed'));
       return true;
     });
   }

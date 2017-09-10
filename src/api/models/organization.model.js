@@ -8,9 +8,12 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING
     },
 
+    image: {
+      type: DataTypes.STRING
+    },
+
     abstract: {
-      type: DataTypes.TEXT,
-      allowNull: false
+      type: DataTypes.TEXT
     },
 
     description: {

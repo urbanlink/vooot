@@ -7,7 +7,7 @@ var logger = require('../../config/logger');
 var utils = require('../utils');
 
 
-// Retrieve a list of organizations
+// Retrieve a list of memberships
 exports.index = function(req, res) {
   var limit = parseInt(req.query.limit) || 10;
   if (limit > 50) { limit = 50; }
@@ -16,17 +16,21 @@ exports.index = function(req, res) {
   var filter = {};
 
   console.log(req.query);
-  if (req.query.parent_id) {
-    filter.parent_id = req.query.parent_id;
+  if (req.query.organization_id) {
+    filter.organization_id = req.query.organization_id;
   }
-  if (req.query.classification_id) {
-    filter.classification_id = req.query.classification_id;
+  if (req.query.role_id) {
+    filter.role_id = req.query.role_id;
   }
-  models.organization.findAndCountAll({
+  models.membership.findAndCountAll({
     where: filter,
     limit: limit,
     offset: offset,
     // order: [[order]]
+    include: [{
+      model: models.person,
+      as: 'person'
+    }]
   }).then(function(result) {
     return res.json(result);
   }).catch(function(err){
@@ -35,18 +39,18 @@ exports.index = function(req, res) {
 };
 
 
-// Create a new organization
+// Create a new membership
 exports.create = function(req, res) {
   // create the new contact and add it to the person
-    models.organization.create({
-      name: req.body.name,
-      summary: req.body.summary,
+    models.membership.create({
+      label: req.body.label,
       startdate: req.body.startdate,
       enddate: req.body.enddate,
-      classification_id: req.body.classification_id,
-      parent_id: req.body.parent_id
+      person_id: req.body.person_id,
+      organization_id: req.body.organization_id,
+      role_id: req.body.role_id
     }).then(function(response) {
-      logger.info('organization created.');
+      logger.info('membership created.');
       return res.json(response);
     }).catch(function(err) {
       return utils.handleError(res, err);
@@ -55,29 +59,15 @@ exports.create = function(req, res) {
 };
 
 
-// Show a single organization
+// Show a single membership
 exports.show = function(req,res) {
-  models.organization.find({
+  models.membership.find({
     where: {
-      id: req.params.organizationId
+      id: req.params.id
     },
     include: [{
-      model: models.identifier,
-      as: 'identifiers',
-      foreignKey: 'organization_id',
-      attributes: ['id', 'value'],
-      include: [{
-        // Identifier type
-        model: models.identifier_type,
-        as: 'type',
-        attributes: ['id', 'value']
-      }]
-    }, {
-      model: models.organization,
-      as: 'parent',
-    }, {
-      model: models.organization_classification,
-      as: 'classification',
+      model: models.membership_role,
+      as: 'role',
     }
   ]
   }).then(function(event){
@@ -88,11 +78,12 @@ exports.show = function(req,res) {
 };
 
 
-// Update an existing organization
+// Update an existing membership
 exports.update = function(req, res) {
-  logger.info('Updating organization ', req.params.organizationId, req.body);
-  models.organization.update(req.body, {
-    where: { id: req.params.organizationId }
+  logger.info('Updating membership ', req.params.id, req.body);
+  logger.info('Updating membership ', req.body);
+  models.membership.update(req.body, {
+    where: { id: req.params.id }
   }).then(function(result) {
     return res.json(result);
   }).catch(function(err){
@@ -101,11 +92,11 @@ exports.update = function(req, res) {
 };
 
 
-// Delete an organization
+// Delete an membership
 exports.delete = function(req, res) {
-  models.organization.destroy({
+  models.membership.destroy({
     where: {
-      id: req.params.organizationId
+      id: req.params.id
     }
   }).then(function(result) {
     logger.info('Organization deleted', result);
@@ -116,11 +107,11 @@ exports.delete = function(req, res) {
 };
 
 
-// List of classifications for an organization
-exports.classifications = function(req, res) {
-  models.organization_classification.findAll().then(function(types) {
-    return res.json(types);
+// List of classifications for an membership
+exports.roleTypes = function(req, res) {
+  models.membership_role.findAll().then(function(roles) {
+    return res.json(roles);
   }).catch(function(err) {
-    utils.handleError(res,err);
+    utils.handleError(res, err);
   });
 };

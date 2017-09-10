@@ -193,7 +193,6 @@ exports.rejectToken = function(req, res, next) {
 
 exports.isAdmin = function(account) {
   console.log('Validating isAdmin');
-  console.log(account.roles.indexOf(1));
   return ( account && (account.roles.indexOf(1) !== -1) );
 };
 
