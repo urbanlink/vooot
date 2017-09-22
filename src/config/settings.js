@@ -11,6 +11,8 @@ module.exports = {
 
   root : path.normalize(__dirname + '/..'),
 
+  version: '0.3.1',
+
   environment : process.env.NODE_ENV || env.NODE_ENV || 'development',
   port : process.env.NODE_API_PORT || env.NODE_API_PORT || 8000,
   domain : process.env.DOMAIN || env.DOMAIN || 'http://localhost:8000',

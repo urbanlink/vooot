@@ -9,35 +9,41 @@
     adduser vooot
 
 
-    # Basics
+# Basics
     sudo apt-get update
     sudo apt-get upgrade
     sudo apt-get install nginx git
+## Increase Swap space
+https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-16-04
 
-    # Firewall
+
+# Firewall
     sudo ufw allow OpenSSH
     sudo ufw allow nginx-full
     sudo ufw enable
     sudo ufw status
 
-    # nodejs
-    cd ~
-    curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh
-    nano nodesource_setup.sh
-    sudo bash nodesource_setup.sh
-    sudo apt-get install nodejs
-    sudo apt-get install build-essential
+# nodejs
+    $ cd ~
+    $ curl -sL https://deb.nodesource.com/setup_7.x -o nodesource_setup.sh
+    $ nano nodesource_setup.sh
+    $ sudo bash nodesource_setup.sh
+    $ sudo apt-get install nodejs
+    $ sudo apt-get install build-essential
 
-    # PM2
+    $ npm install -g n
+    $ sudo n 7.8.0
+
+# PM2
     sudo npm install -g pm2
     pm2 startup systemd
     sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u vooot --hp /home/vooot
 
-    # Let's encrypt
+# Let's encrypt
     sudo add-apt-repository ppa:certbot/certbot
     sudo apt-get update
 
-    # Nginx configuration
+# Nginx configuration
     # Always use https
     sudo nano /etc/nginx/sites-enabled/default
       # HTTP — redirect all traffic to HTTPS
@@ -99,19 +105,23 @@
     sudo apt-get fail2ban
 
 
-    # mysql
-    sudo apt-get install mysql-server
-    sudo mysql_secure_installation
-    https://www.digitalocean.com/community/tutorials/how-to-secure-mysql-and-mariadb-databases-in-a-linux-vps
-    create db
-    create user
-    initiate db
+# mysql
+[Source](https://www.digitalocean.com/community/tutorials/how-to-secure-mysql-and-mariadb-databases-in-a-linux-vps)
+
+    $ sudo apt-get install mysql-server
+    $ sudo mysql_secure_installation
+    $ mysql -u root -p
+    $ create database dbname;
+    $ grant all privileges on dbname.* to 'dbuser'@'localhost' identified by "dbpass";
+    $ flush privileges;
+    $ exit;
 
 
-    # Git push from
-    nano /hooks/post-receive
+# Git push from
+    $ nano /hooks/post-receive
+
     #!/bin/sh
     git --work-tree=/home/vooot/apps/api.vooot.nl/live --git-dir=/home/vooot/apps/api.vooot.nl/repo checkout -f
-    npm install
-    
-    git push master production
+
+    $ npm install
+    $ git push master production

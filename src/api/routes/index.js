@@ -1,6 +1,7 @@
 'use strict';
 
 var fs = require('fs');
+var version = require('../../config/settings').version;
 
 module.exports = function(app) {
 
@@ -20,7 +21,8 @@ module.exports = function(app) {
         msg: 'ok',
       },
       data: {
-        info: 'Welcome to the voOot API, more info is available at https://docs.vooot.nl/api',
+        info: 'Welcome to the voOot API. ',
+        version: version,
         endpoints: {
           account: 'Get user info',
           person: '[GET, PUT, POST]: A person',
