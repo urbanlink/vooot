@@ -8,17 +8,22 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING,
       required: true,
     },
+
     description: {
       type: DataTypes.TEXT
     },
+
     paid: {
-      type: DataTypes.BOOLEAN
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     },
+
     startdate: {
-      type: DataTypes.STRING
+      type: DataTypes.DATE
     },
+
     enddate: {
-      type: DataTypes.STRING
+      type: DataTypes.DATE
     }
   });
 

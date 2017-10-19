@@ -24,18 +24,18 @@ module.exports = function(sequelize, DataTypes) {
     },
 
     activationkey: {
-        type: DataTypes.STRING,
-        allowNull: true
+      type: DataTypes.STRING,
+      allowNull: true
     },
 
     resetpasswordkey: {
-        type: DataTypes.STRING,
-        allowNull: true
+      type: DataTypes.STRING,
+      allowNull: true
     },
 
     verified: {
-        type: DataTypes.BOOLEAN,
-        allowNull: true
+      type: DataTypes.BOOLEAN,
+      allowNull: true
     },
 
     picture: DataTypes.STRING,

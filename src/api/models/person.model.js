@@ -24,11 +24,11 @@ module.exports = function(sequelize, DataTypes) {
     },
 
     birthdate: {
-      type: DataTypes.STRING
+      type: DataTypes.DATE
     },
 
     deathdate: {
-      type: DataTypes.STRING
+      type: DataTypes.DATE
     },
 
     headshot: {

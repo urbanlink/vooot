@@ -7,6 +7,14 @@ module.exports = function(sequelize, DataTypes) {
     value: {
       type: DataTypes.STRING,
       required: true
+    },
+
+    name: {
+      type: DataTypes.STRING
+    },
+
+    description: {
+      type: DataTypes.TEXT
     }
   }, {
     timestamps: false

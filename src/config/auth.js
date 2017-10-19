@@ -132,7 +132,6 @@ exports.generateRefreshToken = function(req, res, next) {
 
 // Validate if a refreshtoken is valid. If refreshtoken exists in database and connected account is valid
 exports.validateRefreshToken = function(req, res, next) {
-
   // find the autheclient and the connected account
   models.account_authclient.findOne({
     where: {
@@ -151,7 +150,9 @@ exports.validateRefreshToken = function(req, res, next) {
     }]
   }).then(function(result) {
     if (!result) { return next('no client found. '); }
-    if (!result.dataValues.account.dataValues.id) { return next('No account found for this refresh token. '); }
+    if (!result.dataValues.account.dataValues.id) {
+      return next('No account found for this refresh token. ');
+    }
 
     // add user_id and client_id to the request header
     var account = result.dataValues.account.dataValues;

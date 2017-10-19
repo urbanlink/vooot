@@ -12,9 +12,11 @@ module.exports = function(sequelize, DataTypes) {
     label: {
       type: DataTypes.STRING
     },
+
     startdate: {
       type: DataTypes.DATE
     },
+
     enddate: {
       type: DataTypes.DATE
     }

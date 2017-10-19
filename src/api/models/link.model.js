@@ -7,13 +7,16 @@ module.exports = function(sequelize, DataTypes) {
     title: {
       type: DataTypes.STRING,
     },
+
     value: {
       type: DataTypes.STRING,
       required: true,
     },
+
     description: {
       type: DataTypes.STRING,
     },
+
     category: {
       type: DataTypes.STRING,
     }
