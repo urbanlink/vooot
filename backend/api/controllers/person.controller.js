@@ -17,7 +17,7 @@ function handleError(res, err) {
 // person index
 exports.index = function(req,res) {
 
-  var limit = parseInt(req.query.limit) || 10;
+  var limit = parseInt(req.query.limit) || 50;
   if (limit > 50) { limit = 50; }
   var offset = parseInt(req.query.offset) || 0;
   var order = req.query.order || 'created_at, DESC';

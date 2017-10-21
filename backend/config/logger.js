@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var winston = require('winston');
-var logDir = path.join(__dirname, '../../logs');
+var logDir = path.join(__dirname, '/../logs');
 
 winston.emitErrs = true;
 winston.setLevels(winston.config.syslog.levels);

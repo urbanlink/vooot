@@ -8,7 +8,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var models = require('../api/models');
 var bcrypt = require('bcrypt');
-var utils = require('../../src/api/utils');
+var utils = require('../api/utils');
 logger.info('Setting up passport strategy');
 
 // Account auth settings
