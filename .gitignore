@@ -122,3 +122,5 @@ digitalocean.txt
 /docs/data-models/vooot-database-diagram.mwb.bak
 /codes
 package-lock.json
+*.mwb
+*.bak
