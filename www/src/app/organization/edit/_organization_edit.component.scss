@@ -1,0 +1,72 @@
+h1 {
+  font-size: 24px;
+  color: #3d3d3d;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 0.75rem;
+}
+h2.position {
+  font-size: 13px;
+  color: #3d3d3d;
+  font-weight: 600;
+}
+h3 {
+  font-size: 18px;
+  color: #3d3d3d;
+  font-weight: 600;
+}
+h4 {
+  font-size: 15px;
+  color: #3d3d3d;
+  font-weight: 600;
+}
+
+.organization-page-header {
+  padding: 2rem 0;
+  text-align: center;
+  background-color: #efefef;
+  color: #222;
+  margin-bottom: 1.5rem;
+  .image-container {
+    margin: 0 auto;
+    margin-bottom: 1rem;
+    height: 120px;
+    min-height: 120px;
+    max-height: 120px;
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    border: 1px solid #efefef;
+    display: block;
+    background-size: cover;
+    background-position: center center;
+    border-radius: 50%;
+    background-color: #FFF;
+  }
+}
+
+
+ngb-tabset /deep/ {
+  ul.nav-tabs {
+    list-style: none;
+    font-size: 50px;
+    li.nav-item {
+      margin-right: 40px;
+      font-size: 15px;
+      a.nav-link {
+        color: #3d3d3d;
+        font-weight: normal;
+        padding: 13px 0;
+        border: 0;
+        &.active {
+          border-bottom: 2px solid #fd4848;
+        }
+      }
+    }
+  }
+
+  .tab-content {
+    padding: 20px;
+  }
+
+}

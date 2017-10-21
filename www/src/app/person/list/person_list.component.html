@@ -1,0 +1,54 @@
+<div class="page-wrapper person-list">
+
+  <div class="breadcrumb">
+    <i class="fa fa-home"></i> &rarr; <span class="current">personen</span>
+  </div>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>Personen</h1>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div class="container">
+      <div class="row actions">
+        <div class="col">
+          <div class="box">
+            <div class="row">
+              <div class="col">
+                <form name="form" #f="ngForm" novalidate>
+                  <div class="form-group">
+                    <input type="text" class="form-control" name="search"
+                    placeholder="Zoeken ..."
+                    [(ngModel)]="search.query" (ngModelChange)="doSearch()" #search="ngModel" required />
+                  </div>
+                </form>
+              </div>
+              <div class="col" *ngIf="auth.isAdmin()">
+                <div class="admin-actions text-right">
+                  <a [routerLink]="['/person/create']"><i class="fa fa-plus"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="box">
+            <div class="person-item" *ngFor="let person of persons.rows">
+              <a [routerLink]="[ '/person', person.id ]">
+                <div class="avatar-container" [ngStyle]="{'background-image': 'url(' + person.headshot + ')'}"></div>
+                {{person.displayname}}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>Default pagination</div>
+      <ngb-pagination [collectionSize]="persons.count" [(page)]="pagination.page" [(pageSize)]="pagination.itemsPerPage" (pageChange)="onPager($event)"></ngb-pagination>
+    </div>
+  </div>
+</div>
