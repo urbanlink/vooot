@@ -1,33 +1,32 @@
-# voOot API Technology
+# voOot Technology Stack
 
 ## Summary
 
   - [Digital Ocean](http://digitalocean.com)
-  - [Ubuntu 14.04 LTS](http://releases.ubuntu.com/14.04/)
+  - [Ubuntu 16.04 LTS](http://releases.ubuntu.com/16.04/)
   - [NGINX](http://nginx.com)
   - [NodeJS](https://nodejs.org)
-  - [SailsJS](http://sailsjs.org/)
   - [PM2](https://github.com/Unitech/pm2)
-  - [MongoDB](https://www.mongodb.org/)
-  - [Auth0](https://auth0.com)
+  - [MySQL](https://www.mysql.com/)
   - [Sendgrid](https://sendgrid.com)
   - [Amazon S3](https://aws.amazon.com/s3/)
-  - [AngularJS](https://angularjs.com)
+  - [Angular](https://angular.io)
+  - [SequelizeJS](https://sequelizejs.com)
 
 
 ## Server
-We currently run the [voOot API](https://api.vooot.nl) on a [Digital Ocean](http://digitalocean.com) droplet running [Ubuntu 14.04 LTS](http://releases.ubuntu.com/14.04/)
+We run the [voOot API](https://api.vooot.nl) on a [Digital Ocean](http://digitalocean.com) droplet running [Ubuntu 16.04 LTS](http://releases.ubuntu.com/16.04/)
 The webserver is [NGINX](http://nginx.com) which proxies the api to the webserver port.
-Server installation is done by running [bootstrap.sh](https://github.com/urbanlink/vooot-api/blob/master/bootsrap.sh)
+Server installation is done by running 'config/bootsrap.sh'.
 
 ## Backend Framework
-The API is a [SailsJS](http://sailsjs.org/) application. SailsJS is a  [NodeJS](https://nodejs.org) web framework. In the production environment the SailsJS application is run using [PM2](https://github.com/Unitech/pm2).
+The API is a NodeJS custom API. In the production environment the application is run using [PM2](https://github.com/Unitech/pm2).
 
 ## Database technology
-The voOot API is run using a [MongoDB](https://www.mongodb.org/) database.
+The voOot API is run using a [MySQL](https://www.mysql.com/) database.
 
 ## Authentication
-We use the [Auth0](https://auth0.com) service for user authentication and API requests. We don't store user credentials at voOot.
+We use JWT and PassportJS for authentication.
 
 ## Email
 Email is sent by using the [Sendgrid](https://sendgrid.com) service.
@@ -35,17 +34,5 @@ Email is sent by using the [Sendgrid](https://sendgrid.com) service.
 ## File storage
 Files are stored and retrieved using [Amazon S3](https://aws.amazon.com/s3/).
 
-## Environment variables
-
-    NODE_ENV
-    DB_URL
-    ROOT_URL
-    AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY
-    AWS_BUCKET_REGION
-    AWS_BUCKET_NAME
-    TZ = Europe/Amsterdam
-    SENDGRID_API_KEY
-    GOOGLE_API_KEY
-
 ## CRON
+Currently cron is not being used.
