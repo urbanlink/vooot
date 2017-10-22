@@ -15,7 +15,7 @@ import {
 
 export class OrganizationDetailComponent {
 
-  private loading:Boolean = false;
+  public loading:Boolean = false;
   // Loaded content
   private organizationId:Number = null;
   private organization:any = {};
@@ -25,12 +25,12 @@ export class OrganizationDetailComponent {
   private selectedCommittee:Number;
 
   // Organization edit/add
-  private displayOrganizationForm:Boolean;
+  public displayOrganizationForm:Boolean;
   private organizationClassifications:any = {};
   private newOrganization:any = {};
 
   // membership edit/add
-  private displayMembershipForm:Boolean;
+  public displayMembershipForm:Boolean;
   private membershipRoleTypes:any = [];
   private newMembership:any = {};
   private memberships = {
@@ -45,7 +45,7 @@ export class OrganizationDetailComponent {
     private organizationService: VoootOrganizationService,
     private membershipService: VoootMembershipService,
     private alertService: AlertService,
-    private auth:AuthService
+    public auth:AuthService
   ) {}
 
   // Get the municipality

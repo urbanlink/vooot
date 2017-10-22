@@ -11,7 +11,7 @@ import { AlertService, AuthService, VoootPersonService } from './../../_services
 
 export class PersonCreateComponent {
 
-  private loading:Boolean;
+  public loading:Boolean;
   public person:any = {};
 
   public constructor (

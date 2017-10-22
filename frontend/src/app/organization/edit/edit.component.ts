@@ -11,7 +11,7 @@ import { AlertService, AuthService, VoootOrganizationService } from './../../_se
 
 export class OrganizationEditComponent {
 
-  private loading:Boolean = true;
+  public loading:Boolean = true;
   private organizationId:Number;
   public organization:any;
   public updatedOrganization:any = {};

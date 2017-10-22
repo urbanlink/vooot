@@ -11,7 +11,7 @@ import { AlertService, AuthService, VoootOrganizationService } from './../../_se
 
 export class OrganizationCreateComponent {
 
-  private loading:Boolean;
+  public loading:Boolean;
   public organization:any = {};
   public classifications:any = {};
 

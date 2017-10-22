@@ -10,7 +10,7 @@ export class NavComponent implements OnInit {
 
   private navbarCollapsed:boolean = true;
 
-  constructor(private auth:AuthService) { }
+  constructor(public auth:AuthService) { }
 
   ngOnInit() {}
 

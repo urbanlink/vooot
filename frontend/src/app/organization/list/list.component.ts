@@ -13,12 +13,12 @@ import {
 })
 
 export class OrganizationListComponent {
-    municipalities = {};
-    loading = false;
+    public municipalities:any = {};
+    public loading:Boolean = false;
 
     constructor (
       private router: Router,
-      private auth:AuthService,
+      public auth:AuthService,
       private organizationService: VoootOrganizationService,
       private alertService: AlertService) { }
 
@@ -34,6 +34,10 @@ export class OrganizationListComponent {
           this.alertService.error(error);
           this.loading = false;
         });
+    }
+
+    public doSearch() {
+
     }
 
     ngOnInit() {

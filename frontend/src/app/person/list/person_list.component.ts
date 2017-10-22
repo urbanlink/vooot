@@ -13,8 +13,8 @@ import {
 })
 
 export class PersonListComponent {
-    persons = {};
-    loading = false;
+    persons:any = {};
+    loading:Boolean = false;
 
     // Setup pagination
     pagination:any = {
@@ -23,7 +23,7 @@ export class PersonListComponent {
     }
 
     constructor (
-      private auth:AuthService,
+      public auth:AuthService,
       private router: Router,
       private personService: VoootPersonService,
       private alertService: AlertService) { }
@@ -39,6 +39,10 @@ export class PersonListComponent {
           this.alertService.error(error);
           this.loading = false;
         });
+    }
+
+    public doSearch() {
+
     }
 
     onPager(event: number): void {

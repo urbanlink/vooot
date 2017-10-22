@@ -13,7 +13,7 @@ import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
 
 export class PersonEditComponent {
 
-  private loading:Boolean = true;
+  public loading:Boolean = true;
   private contactTypes:any;
   private identifierTypes:any;
   private personId:Number;

@@ -11,7 +11,7 @@ import { AlertService, AuthService, VoootPersonService } from './../../_services
 
 export class PersonDetailComponent {
 
-    private loading:Boolean = false;
+    public loading:Boolean = false;
     private personId:Number = null;
     private person:Object = {};
 

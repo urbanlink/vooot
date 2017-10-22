@@ -12,7 +12,7 @@ export class FooterComponent implements OnInit {
   private version:string= env.version;
 
   constructor(
-    private auth:AuthService
+    public auth:AuthService
   ){}
 
   ngOnInit(){}
