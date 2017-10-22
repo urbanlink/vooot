@@ -117,11 +117,11 @@ https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu
     $ exit;
 
 
-# Git push from
-    $ nano /hooks/post-receive
+# Git initialization
 
-    #!/bin/sh
-    git --work-tree=/home/vooot/apps/api.vooot.nl/live --git-dir=/home/vooot/apps/api.vooot.nl/repo checkout -f
+    $ cd /var/www/vooot/repository/vooot.git
+    $ cp git/hooks/post-receive hooks/post-receive
+    $ chmod +x hooks/post-receive
 
-    $ npm install
+# Push to server
     $ git push master production
