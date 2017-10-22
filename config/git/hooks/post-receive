@@ -23,6 +23,7 @@ do
         echo "Done updating the backend."
 
         cd /var/www/vooot/production/frontend
+        npm install
         ng build --prod
 
     else
