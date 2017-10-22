@@ -33,3 +33,4 @@ http://geekswithblogs.net/shaunxu/archive/2016/03/18/implement-ical-subscription
 ### References
 https://icalendar.org
 https://icalendar.org/validator.html
+http://stevethomas.com.au/php/how-to-build-an-ical-calendar-with-php-and-mysql.html
