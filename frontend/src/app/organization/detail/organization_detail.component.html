@@ -1,0 +1,247 @@
+<div class="text-center" *ngIf="loading"><i class="fa fa-spinner fa-spin"></i></div>
+
+<div class="page wrapper organization_detail" *ngIf="!loading">
+  <section class="page-header">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12 col-md-3 col-lg-2">
+          <div class="image-container" [ngStyle]="{'background-image': 'url(' + organization.image + ')'}"></div>
+        </div>
+        <div class="col-sm-6 align-self-center">
+          <h1 class="displayname">{{organization.name}}</h1>
+          <h3>{{organization.classification.name}}</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-body">
+    <div class="container">
+      <div class="row">
+        <div class="col-8">
+          <div class="box">
+            <h3>Beschrijving</h3>
+            <p class="description">{{ organization.description || 'Deze organisatie heeft nog geen beschrijving.' }}</p>
+          </div>
+        </div>
+        <!--  Sidebar -->
+        <div class="col-sm-4 side-content">
+          <div class="side-block box">
+            <div class="block-section organization-actions first">
+              <ul>
+                <li><i class="fa fa-eye"></i>Volg deze organisatie</li>
+                <li><a [routerLink]="['edit']" *ngIf="auth.isAdmin()"><i class="fa fa-wrench"></i> Bewerken</a></li>
+                <li>Opgericht: {{organization.foundingdate | date}}</li>
+                <li *ngIf="organization.dissolutiondate">Ontbonden: {{organization.dissolutiondate | date}}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="identifier-list" *ngIf="organization.identifiers.length>0">
+          <h3>Identifiers</h3>
+          <table class="table">
+            <tr><td><strong>vooot:</strong></td><td>p{{organization.id}}</td></tr>
+            <tr *ngFor="let identifier of organization.identifiers">
+              <td><strong>{{identifier.type.value}}:</strong></td> <td>{{identifier.value}}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="box council">
+        <h3>Gemeenteraad <a class="create" (click)="showOrganizationForm({type:'council'})"><i class="fa fa-plus"></i></a></h3>
+        <div class="council-list" *ngIf="councils.length>0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>id</th>
+                <th>name</th>
+                <th>start</th>
+                <th>end</th>
+                <th>actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let council of councils"
+              class="council-item"
+              [class.active]="selectedCouncil==council.id"
+              (click)="selectCouncil(council.id)">
+                <td>{{ council.id }}</td>
+                <td>{{ council.name }}</td>
+                <td>{{ council.foundingdate || '' | date: 'dd-MM-yyyy' }}</td>
+                <td>{{ council.dissolutiondate || '' | date: 'dd-MM-yyyy' }}</td>
+                <td><a (click)="showOrganizationForm({type:'council', organization:council})" class="edit"><i class="fa fa-wrench"></i></a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="box persons">
+        <h3>Raadsleden <a class="create" (click)="showMembershipForm({type:'council'})"><i class="fa fa-plus"></i></a></h3>
+
+        <table class="table" *ngIf="memberships.council.length>0">
+          <tr *ngFor="let membership of memberships.council">
+            <td>
+              <div class="avatar-container" [ngStyle]="{'background-image': 'url(' + membership.person.headshot + ')'}"></div>
+            </td>
+            <td>{{ membership.person.displayname }} ({{ membership.person.id }})</td>
+            <td><a (click)="showMembershipForm({type:'council', membership: membership })" class="edit"><i class="fa fa-wrench"></i></a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="box committees">
+        <h3>Commissies  <a class="create" (click)="showOrganizationForm({type:'committee'})"><i class="fa fa-plus"></i></a></h3>
+        <table class="table" *ngIf="committees.length>0">
+          <tr *ngFor="let committee of committees">
+            <td>{{ committee.id }}</td>
+            <td>{{ committee.name }}</td>
+            <td>{{ committee.foundingdate | date }}</td>
+            <td>{{ committee.dissolutiondate | date }}</td>
+            <td><a (click)="showOrganizationForm({type:'committee', organization:committee })" class="edit"><i class="fa fa-wrench"></i></a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="block devel" *ngIf="auth.isAdmin()">
+        <h3>Devel</h3>
+        Person id: <code>{{ organizationId }}</code><br> Person object:<br>
+        <pre>{{organization|json}}</pre>
+      </div>
+    </div>
+  </section>
+</div>
+
+
+<!--  Add / edit organization -->
+<div class="organization-form" *ngIf="displayOrganizationForm">
+  <div class="container">
+    <form name="form" (ngSubmit)="f.form.valid && submitOrganization()" #f="ngForm" novalidate>
+      <h3>Organisatie <span *ngIf="newOrganization.id">edit: {{ newOrganization.name }}</span><span *ngIf="!newOrganization.id">toevoegen</span></h3>
+
+      <!--  Organization parent (for reference) -->
+      <div class="form-group row">
+        <div class="col">Parent: {{ newOrganization.parent_id }}</div>
+      </div>
+
+      <!--  Organization name -->
+      <div class="form-group row">
+        <label for="name" class="col-3">Name</label>
+        <div class="col-3">
+          <input type="text" class="form-control" name="name" [(ngModel)]="newOrganization.name" #name="ngModel" />
+        </div>
+      </div>
+
+      <!--  Image -->
+      <div class="form-group row">
+        <label for="iamge" class="col-3">image</label>
+        <div class="col-3">
+          <input type="text" class="form-control" name="image" [(ngModel)]="newOrganization.image"
+          #image="ngModel" />
+        </div>
+      </div>
+
+      <!--  Founding date -->
+      <div class="form-group row">
+        <label class="col-3" for="birthdate">Founding date</label>
+        <div class="col">
+          <div class="form-inline">
+            <div class="form-group">
+              <input class="form-control" placeholder="yyyy-mm-dd" name="foundingdate" [(ngModel)]="newOrganization.foundingdate"
+              ngbDatepicker
+              #d="ngbDatepicker">
+              <button class="input-group-addon" (click)="d.toggle()" type="button">
+                <i class="fa fa-calendar" style="width: 1.2rem; height: 1rem; cursor: pointer;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--  Dissolution date -->
+      <div class="form-group row">
+        <label class="col-3" for="deathdate">Dissolution datum</label>
+        <div class="col">
+          <div class="form-inline">
+            <div class="form-group">
+              <div class="input-group">
+                <input class="form-control" placeholder="yyyy-mm-dd" name="dissolutiondate" [(ngModel)]="newOrganization.dissolutiondate"
+                ngbDatepicker #d2="ngbDatepicker">
+                <button class="input-group-addon" (click)="d2.toggle()" type="button">
+                  <i class="fa fa-calendar" style="width: 1.2rem; height: 1rem; cursor: pointer;"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--  Organization abstract -->
+      <div class="form-group row">
+        <label for="abstract" class="col-3">Abstract</label>
+        <div class="col">
+          <textarea type="text" class="form-control" name="abstract" [(ngModel)]="newOrganization.abstract" #abstract="ngModel" rows="5"></textarea>
+        </div>
+      </div>
+
+      <!--  Actions -->
+      <div class="form-group row">
+        <div class="col-3"></div>
+        <div class="col">
+          <a (click)="updateOrganization()" *ngIf="newOrganization.id" class="btn btn-primary">
+            <span *ngIf="!loading">Update</span><span *ngIf="loading"><i class="fa fa-spinner fa-spin"></i></span>
+          </a>
+          <button *ngIf="!newOrganization.id"[disabled]="loading" class="btn btn-primary"><span *ngIf="!loading">Toevoegen</span><span *ngIf="loading"><i class="fa fa-spinner fa-spin"></i></span></button>
+          <a (click)="displayOrganizationForm=!displayOrganizationForm">Annuleren</a>
+        </div>
+      </div>
+
+      <pre>{{newOrganization | json}}</pre>
+    </form>
+  </div>
+</div>
+
+<!--  Add / edit membership -->
+<div class="membership-form" *ngIf="displayMembershipForm">
+  <div class="container">
+    <form name="form" (ngSubmit)="f.form.valid && submitMembership()" #f="ngForm" novalidate>
+      <h3>Add person to organization</h3>
+
+      <!--  Committee id (for reference) -->
+      <div class="form-group row">
+        <div class="col">Council: {{ newMembership.organization_id }}</div>
+      </div>
+
+      <!--  Organization name -->
+      <div class="form-group row">
+        <label for="name" class="col-3">Person</label>
+        <div class="col-3">
+          <input type="text" class="form-control" name="person_id" [(ngModel)]="newMembership.person_id" #person_id="ngModel" />
+        </div>
+      </div>
+
+      <!--  Image -->
+      <div class="form-group row">
+        <label for="iamge" class="col-3">Role</label>
+        <div class="col-3">
+          <input type="text" class="form-control" name="role_id" [(ngModel)]="newMembership.role_id"
+          #role_id="ngModel" />
+        </div>
+      </div>
+
+      <!--  Actions -->
+      <div class="form-group row">
+        <div class="col-3"></div>
+        <div class="col">
+          <button [disabled]="loading" class="btn btn-primary"><span *ngIf="!loading">Toevoegen</span><span *ngIf="loading"><i class="fa fa-spinner fa-spin"></i></span></button>
+          <a (click)="displayMembershipForm=!displayMembershipForm">Annuleren</a>
+        </div>
+      </div>
+
+      <pre>New membership: {{ newMembership | json }}</pre>
+      <pre>Organization role types: {{ membershipRoleTypes | json }}</pre>
+    </form>
+  </div>
+</div>

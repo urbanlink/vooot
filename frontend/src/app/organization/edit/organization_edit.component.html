@@ -1,0 +1,165 @@
+<div class="text-center" *ngIf="loading"><i class="fa fa-spinner fa-spin"></i></div>
+
+<div class="organization-edit-wrapper" *ngIf="!loading">
+  <section class="organization-page-header">
+    <div class="container">
+      <div class="image-container" [ngStyle]="{'background-image': 'url(' + organization.image + ')'}"></div>
+      <a [routerLink]="['/organization', organization.id]">
+        <h1 class="displayname">{{organization.name}}</h1>
+      </a>
+      <h3>{{organization.classification.name}}</h3>
+    </div>
+  </section>
+
+  <div class="container">
+
+  <div class="col">
+
+    <ngb-tabset>
+      <ngb-tab title="Basis">
+        <ng-template ngbTabContent>
+          <form name="form" #f="ngForm" novalidate>
+
+            <div class="form-group row">
+              <label for="name" class="col-3">Name</label>
+              <div class="col-3">
+                <input type="text" class="form-control" name="name" [(ngModel)]="organization.name"
+                (ngModelChange)="organizationModelChange('name', $event)"
+                #name="ngModel" />
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="iamge" class="col-3">image</label>
+              <div class="col-3">
+                <input type="text" class="form-control" name="image" [(ngModel)]="organization.image"
+                (ngModelChange)="organizationModelChange('image', $event)"
+                #image="ngModel" />
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="description" class="col-3">Description</label>
+              <div class="col">
+                <textarea type="text" class="form-control" name="description" [(ngModel)]="organization.description"
+                (ngModelChange)="organizationModelChange('description', $event)"
+                 #summary="ngModel" rows="5"></textarea>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label class="col-3" for="birthdate">Founding date</label>
+              <div class="col">
+                <div class="form-inline">
+                  <div class="form-group">
+                    <input class="form-control" placeholder="yyyy-mm-dd" name="foundingdate" [(ngModel)]="organization.foundingdate"
+                    (ngModelChange)="organizationModelChange('foundingdate', $event)"
+                    ngbDatepicker
+                    #d="ngbDatepicker">
+                    <button class="input-group-addon" (click)="d.toggle()" type="button">
+                      <i class="fa fa-calendar" style="width: 1.2rem; height: 1rem; cursor: pointer;"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label class="col-3" for="deathdate">Dissolution datum</label>
+              <div class="col">
+                <div class="form-inline">
+                  <div class="form-group">
+                    <div class="input-group">
+                      <input class="form-control" placeholder="yyyy-mm-dd" name="dissolutiondate" [(ngModel)]="organization.dissolutiondate"
+                      (ngModelChange)="organizationModelChange('dissolutiondate', $event)"
+                      ngbDatepicker #d2="ngbDatepicker">
+                      <button class="input-group-addon" (click)="d2.toggle()" type="button">
+                        <i class="fa fa-calendar" style="width: 1.2rem; height: 1rem; cursor: pointer;"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-3"></div>
+              <div class="col">
+                <a [routerLink]="" (click)="update()" class="btn btn-primary">Update</a>
+                <a [routerLink]="" (click)="delete()" class="btn btn-danger">DELETE</a>
+                <a [routerLink]="['/organization', organization.id]">Annuleren</a>
+              </div>
+            </div>
+          </form>
+        </ng-template>
+      </ngb-tab>
+
+      <ngb-tab>
+        <ng-template ngbTabTitle>Identifiers</ng-template>
+        <ng-template ngbTabContent>
+
+          <h3>Identifiers:</h3>
+          <div class="identifier-list">
+            <div class="row">
+              <div class="col-3"><strong>vooot_id</strong></div>
+              <div class="col-3">{{organization.id}}</div>
+            </div>
+            <div *ngFor="let identifier of organization.identifiers">
+              <form name="form" (ngSubmit)="updateIdentifier(identifier)" novalidate>
+                <div class="row">
+                  <div class="col-3">
+                      <strong>{{ identifier.type.value }}</strong>
+                  </div>
+                  <div class="col-3">
+                    <div class="form-group">
+                      <input type="text" class="form-control" name="value" [(ngModel)]="identifier.value" #value="ngModel" required />
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="form-group">
+                      <button [disabled]="loading" class="btn btn-primary"><span *ngIf="!loading">Update</span><span *ngIf="loading"><i class="fa fa-spinner fa-spin"></i></span></button>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <i class="fa fa-trash-o" (click)="deleteIdentifier(identifier.id)" href></i>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="add-identifier">
+            <h3>Toevoegen</h3>
+            <form name="form" (ngSubmit)="addIdentifier()" #f="ngForm" novalidate>
+              <div class="row">
+                <div class="col-3">
+                  <div class="form-group">
+                    <select name="type" [(ngModel)]="identifier.type_id">
+                      <option *ngFor="let identifier of identifierTypes" [ngValue]="identifier.id">
+                        {{ identifier.value }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="form-group">
+                    <input type="text" class="form-control" name="value" [(ngModel)]="identifier.value" #value="ngModel" placeholder="value" required />
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="form-group row">
+                    <div class="col-sm-10 offset-md-2">
+                      <button [disabled]="loading" class="btn btn-primary"><span *ngIf="!loading">Toevoegen</span><span *ngIf="loading"><i class="fa fa-spinner fa-spin"></i></span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </ng-template>
+      </ngb-tab>
+    </ngb-tabset>
+  </div>
+
+  <pre>{{ organization | json }}</pre>
+  <pre>{{ updatedOrganization | json }}</pre>

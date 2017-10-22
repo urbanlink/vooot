@@ -1,0 +1,130 @@
+<div class="text-center" *ngIf="loading"><i class="fa fa-spinner fa-spin"></i></div>
+
+<div class="person_index-content-wrapper" *ngIf="!loading">
+  <div class="breadcrumb">
+    <a [routerLink]="['/home']"><i class="fa fa-home"></i></a> &rarr; <a [routerLink]="['/person']">personen</a> &rarr; <span class="current">{{person.displayname}}</span>
+  </div>
+  <section class="person-page-header">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12 col-md-3 col-lg-2">
+          <div class="avatar-container" [ngStyle]="{'background-image': 'url(' + person.headshot + ')'}"></div>
+        </div>
+        <div class="col-sm-6 align-self-center">
+          <h1 class="displayname">{{person.displayname}}</h1>
+          <!-- <div class="name">{{person.firstname}} {{person.lastname}}</div> -->
+          <!-- <h2 class="position">Gemeenteraadslid - Den Haag</h2> -->
+        </div>
+        <!-- <div class="col-sm-12 col-md-3 align-self-center claim-box">
+          <p placement="bottom" ngbTooltip="voOot maakt het mogelijk om gemakkelijk je bereik te vergroten en jouw supporters te identificeren." class="claim">Ben jij dit? <a [routerLink]="['/claim']">Claim dit profiel</a></p>
+        </div> -->
+      </div>
+    </div>
+  </section>
+
+  <section class="person-page-body">
+    <div class="container">
+      <div class="col-sm-12">
+        <ngb-tabset class="tabs">
+          <ngb-tab title="Overzicht">
+            <ng-template ngbTabContent>
+              <div class="row tab-biography">
+                <div class="col-sm-8">
+                  <p class="summary">{{ person.summary || 'Deze persoon heeft nog geen beschrijving.' }}</p>
+                </div>
+
+                <div class="col-sm-8">
+                  <div class="biography box" *ngIf="person.biography">
+                    <h3>Biografie</h3>
+                    <div [innerHTML]="person.biography"></div>
+                  </div>
+
+                  <div class="jobs-list-container box" *ngIf="person.jobs.length>0">
+                    <h3>Nevenfuncties</h3>
+                    <ul class="jobs-list">
+                      <li *ngFor="let job of person.jobs">
+                        <div class="dates" *ngIf="job.startdate">
+                          <span class="from"><i class="fa fa-calendar"></i>{{ job.startdate | date: 'dd-MM-yyyy' }}</span>
+                          <span class="to" *ngIf="job.enddate"> - {{ job.enddate  | date: 'dd-MM-yyyy' }}</span>
+                          <span class="to" *ngIf="!job.enddate"> - heden</span>
+                        </div>
+                        <div class="title">{{ job.title }} <span class="paid" *ngIf="job.paid">[betaald]</span></div>
+                        <div class="description">{{ job.description }}</div>
+                      </li>
+                    </ul>
+                  </div>
+
+                </div>
+                <!--  Sidebar  -->
+                <div class="col-sm-4 side-content">
+                  <div class="side-block">
+
+                    <div class="block-section person-actions first">
+                      <ul>
+                        <li><i class="fa fa-eye"></i>Volg deze persoon</li>
+                        <li><a [routerLink]="['edit']" *ngIf="auth.isAdmin()"><i class="fa fa-wrench"></i>Edit</a></li>
+                      </ul>
+                    </div>
+                    <!-- Person's contact information -->
+                    <div class="block-section contact-list" *ngIf="person.contacts.length>0">
+                      <personcontact [contacts]="person.contacts"></personcontact>
+                    </div>
+
+                    <div class="block-section links-list" *ngIf="person.links.length>0">
+                      <h3>Links</h3>
+                      <ul>
+                        <li *ngFor="let link of person.links">
+                          <a [href]="link.value" target="_blank"><i class="fa fa-link"></i>{{ link.title }}</a>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div class="block-section personal-details" *ngIf="person.birthdate">
+                      <h3>Persoonlijke achtergrond</h3>
+                      <div class="birthdate" *ngIf="person.birthdate">
+                        <h4>Geboortedatum</h4>
+                        <p>{{ person.birthdate | date: 'dd-MM-yyyy' }}</p>
+                      </div>
+                      <div class="deathdate" *ngIf="person.birthdate">
+                        <h4>Geboorteplaats</h4>
+                        <p>'s Gravenhage</p>
+                      </div>
+                    </div>
+
+                    <div class="block-section identifier-list" *ngIf="person.identifiers.length>0">
+                      <h3>Identifiers</h3>
+                      <div><strong>voOot: </strong>p{{person.id}}</div>
+                      <div *ngFor="let identifier of person.identifiers">
+                        <strong>{{identifier.type.value}}: </strong>{{identifier.value}}
+                      </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+            </ng-template>
+          </ngb-tab>
+          <!-- <ngb-tab>
+            <ng-template ngbTabTitle>Activiteiten</ng-template>
+            <ng-template ngbTabContent>
+            </ng-template>
+          </ngb-tab> -->
+
+          <!-- <ngb-tab title="Bio">
+            <ng-template ngbTabContent>
+            </ng-template>
+          </ngb-tab> -->
+
+          <ngb-tab *ngIf="auth.isAdmin()">
+            <ng-template ngbTabTitle>Devel</ng-template>
+            <ng-template ngbTabContent>
+              <div class="tab-devel">
+                Person id: <code>{{ personId }}</code><br> Person object:<br>
+                <pre>{{person|json}}</pre>
+              </div>
+            </ng-template>
+          </ngb-tab>
+        </ngb-tabset>
+      </div>
+    </div>
+  </section>
+</div>

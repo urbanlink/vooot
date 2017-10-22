@@ -1,0 +1,44 @@
+footer.app-footer {
+  background: #fbfbfb;
+  border-top: 3px solid #dbe1e8;
+  padding-top: 50px;
+  img {
+    display: block;
+    margin-bottom: 20px;
+    padding-right: 30px;
+    width: 140px;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin-bottom: 20px;
+    li {
+      &.footer-title {
+        color: #3d3d3d;
+        font-weight: 600;
+        font-size: 15px;
+        padding-bottom: 15px;
+        text-decoration: none;
+      }
+      a {
+        font-size: 13px;
+        padding-bottom: 5px;
+        &:hover {
+          color: #444;
+        }
+      }
+    }
+  }
+  .copy {
+    margin-top: 50px;
+    border-bottom: 1px solid #e2e2e2;
+    border-top: 1px solid #e2e2e2;
+    font-size: 0.8rem;
+    color: #a9a9a9;
+    padding: 20px 0;
+  }
+  .buttons {
+    text-align: right;
+  }
+}

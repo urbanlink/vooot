@@ -1,0 +1,11 @@
+.btn {
+
+}
+.btn-primary {
+  background-color: $brand-primary;
+  border-color: $brand-primary;
+  &:hover {
+    background-color: darken($brand-primary,10);
+    border-color: $brand-primary;
+  }
+}

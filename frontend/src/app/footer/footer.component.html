@@ -1,0 +1,48 @@
+<footer class="app-footer" *ngIf="auth.isLoggedIn()">
+  <div class="container">
+    <div class="row ">
+      <div class="col-sm-12 col-md">
+        <a [routerLink]="['']"><img src="/assets/img/logo.png"></a>
+      </div>
+      <div class="col-sm-12 col-md">
+        <ul>
+          <li class="footer-title">Product</li>
+          <li><a [routerLink]="['vertegenwoordigers']" routerLinkActive="active">Volksvertegenwoordigers</a></li>
+          <li><a [routerLink]="['overheid']" routerLinkActive="active">Overheid</a></li>
+          <li><a [routerLink]="['bewoners']" routerLinkActive="active">Bewoners</a></li>
+          <li><a [routerLink]="['organisaties']" routerLinkActive="active">Organisaties</a></li>
+        </ul>
+      </div>
+      <div class="col-sm-12 col-md">
+        <ul>
+          <li class="footer-title">Bedrijf</li>
+          <li><a [routerLink]="['about']" routerLinkActive="active">About</a></li>
+          <li><a [routerLink]="['contact']" routerLinkActive="active">Contact</a></li>
+          <li><a [routerLink]="['brand-assets']" routerLinkActive="active">Brand assets</a></li>
+        </ul>
+      </div>
+      <div class="col-sm-12 col-md">
+        <ul>
+          <li class="footer-title">Support</li>
+          <li><a [routerLink]="['faq']" routerLinkActive="active">FAQ</a></li>
+          <li><a [routerLink]="['terms']" routerLinkActive="active">Terms &amp; Conditions</a></li>
+          <li><a [routerLink]="['privacy']" routerLinkActive="active">Privacy Policy</a></li>
+        </ul>
+      </div>
+      <div class="col-sm-12 col-md">
+        <ul>
+          <li class="footer-title">Connect</li>
+          <li><a href="https://facebook.com/vooot" target="_blank">Facebook</a></li>
+          <li><a href="https://twitter.com/vooot" target="_blank">Twitter</a></li>
+          <li><a href="https://linkedin.com/vooot" target="_blank">Linkedin</a></li>
+          <li><a href="https://instagram.com/vooot" target="_blank">Instagram</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="row copy">
+      <div class="col">Copyright &copy; 2017 by Urbanlink. v.{{version}}</div>
+    </div>
+
+  </div>
+</footer>

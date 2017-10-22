@@ -1,0 +1,67 @@
+<div class="text-center" *ngIf="loading"><i class="fa fa-spinner fa-spin"></i></div>
+
+<div class="person-create-wrapper" *ngIf="!loading">
+  <div class="breadcrumb">
+    <i class="fa fa-home"></i> &rarr; <a [routerLink]="['/person']">personen</a> &rarr; <span class="current">create</span>
+  </div>
+
+  <div class="page-header">
+    <div class="container">
+      <div class="col">
+        <h1>Nieuw persoon toevoegen</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div class="container">
+      <div class="col">
+        <form name="form" (ngSubmit)="f.form.valid && create()" #f="ngForm" novalidate>
+
+          <div class="form-group row" [ngClass]="{ 'has-error': f.submitted && !firstname.valid }">
+            <label for="firstname" class="col-3">Voornaam</label>
+            <div class="col-3">
+              <input type="text" class="form-control" name="firstname" [(ngModel)]="person.firstname" #firstname="ngModel" />
+            </div>
+            <label for="lastname" class="col-3">Achternaam</label>
+            <div class="col-3">
+              <input type="text" class="form-control" name="lastname" [(ngModel)]="person.lastname" #lastname="ngModel" />
+            </div>
+          </div>
+
+          <div class="form-group row" [ngClass]="{ 'has-error': f.submitted && !displayname.valid }">
+              <label for="displayname" class="col-3">Display name</label>
+              <div class="col">
+                <input type="text" class="form-control" name="displayname" [(ngModel)]="person.displayname" #displayname="ngModel" required />
+                <div *ngIf="f.submitted && !displayname.valid" class="help-block">Displayname is required</div>
+              </div>
+          </div>
+
+          <div class="form-group row" [ngClass]="{ 'has-error': f.submitted && !headshot.valid }">
+              <label class="col-3" for="headshot">Headshot</label>
+              <div class="col">
+                <input type="text" class="form-control" name="headshot" [(ngModel)]="person.headshot" #headshot="ngModel" />
+                <div *ngIf="f.submitted && !headshot.valid" class="help-block">Error</div>
+              </div>
+          </div>
+
+          <div class="form-group row" [ngClass]="{ 'has-error': f.submitted && !summary.valid }">
+            <label class="col-3" for="summary">Summary</label>
+            <div class="col">
+              <textarea type="text" class="form-control" name="summary" [(ngModel)]="person.summary" #summary="ngModel" rows="5"></textarea>
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <div class="col-sm-10 offset-md-2">
+              <button [disabled]="loading" class="btn btn-primary"><span *ngIf="!loading">Toevoegen</span><span *ngIf="loading"><i class="fa fa-spinner fa-spin"></i></span></button>
+              <a href [routerLink]="['/person', person.id]">Annuleren</a>
+            </div>
+          </div>
+        </form>
+        <hr>
+        <pre>Model: {{ person | json }}</pre>
+      </div>
+    </div>
+  </div>
+</div>
