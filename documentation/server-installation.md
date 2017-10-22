@@ -44,6 +44,12 @@ https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu
     sudo apt-get update
 
 # Nginx configuration
+
+  1. Forward all traffic to https
+  2. Use https://vooot.nl for static frontend
+  3. Use https://api.vooot.nl for proxy
+
+
     # Always use https
     sudo nano /etc/nginx/sites-enabled/default
       # HTTP — redirect all traffic to HTTPS
