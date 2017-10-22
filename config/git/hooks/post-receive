@@ -19,12 +19,8 @@ do
         echo "NPM modules installed"
         echo "Starting PM2"
         cd /var/www/vooot/production
-        pm2 start /var/www/vooot/production/backend/pm2.json
+        pm2 start /var/www/vooot/production/backend/pm2/pm2.json
         echo "Done updating the backend."
-
-        cd /var/www/vooot/production/frontend
-        npm install
-        ng build --prod
 
     else
         echo "Ref $ref successfully received. Doing nothing: only the master branch may be deployed on this server."
