@@ -119,8 +119,52 @@ nbproject
 .vagrant
 pm2.json
 digitalocean.txt
-/docs/data-models/vooot-database-diagram.mwb.bak
-/codes
+docs/data-models/vooot-database-diagram.mwb.bak
+codes
 package-lock.json
 *.mwb
 *.bak
+
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+/frontend/dist
+/frontend/tmp
+/frontend/out-tsc
+
+# dependencies
+frontend/node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+frontend/.sass-cache
+frontend/connect.lock
+frontend/coverage
+frontend/libpeerconnection.log
+npm-debug.log
+testem.log
+frontend/typings
+yarn-error.log
+
+# e2e
+frontend/e2e/*.js
+frontend/e2e/*.map
+
+# System Files
+.DS_Store
+Thumbs.db
