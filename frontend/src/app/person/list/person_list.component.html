@@ -20,8 +20,8 @@
                 <form name="form" #f="ngForm" novalidate>
                   <div class="form-group">
                     <input type="text" class="form-control" name="search"
-                    placeholder="Zoeken ..."
-                    [(ngModel)]="search.query" (ngModelChange)="doSearch()" #search="ngModel" required />
+                    placeholder="Zoeken op achternaam"
+                    [(ngModel)]="search.term" (ngModelChange)="doSearch()" #search.term="ngModel" required />
                   </div>
                 </form>
               </div>

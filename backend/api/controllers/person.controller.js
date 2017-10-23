@@ -40,9 +40,9 @@ exports.query = function(req,res) {
   var limit = parseInt(req.query.limit) || 10;
   if (limit > 50) { limit = 50; }
   var offset = parseInt(req.query.offset) || 0;
-  var order = req.query.order || 'created_at DESC';
+  var order = req.query.order || 'created_at, DESC';
   var filter = {
-    name: {
+    lastname: {
       $like: '%' + String(req.query.term) + '%'
     }
   };
@@ -50,10 +50,10 @@ exports.query = function(req,res) {
     where: filter,
     limit: limit,
     offset: offset,
-    order: order,
-    include: [
-      { model: models.identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] }
-    ]
+    // order: [[order]],
+    // include: [
+    //   { model: models.identifier, as: 'identifiers', attributes: ['scheme', 'identifier'] }
+    // ]
   }).then(function(result) {
     return res.json(result);
   }).catch(function(err) {

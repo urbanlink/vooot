@@ -47,7 +47,12 @@ export class VoootPersonService {
     ).map(res=>res.json());
   }
 
-  public search(params:Object) { }
+  public search(term:any):Observable<any> {
+    console.log(term);
+    return this.http.get(
+      env.apiRoot + '/person/query?term=' + term
+    ).map(res=>res.json());
+  }
 
   public getIdentifierTypes():Observable<any> {
     return this.http.get(

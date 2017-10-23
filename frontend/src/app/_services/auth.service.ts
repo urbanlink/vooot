@@ -52,7 +52,7 @@ export class AuthService {
   public isLoggedIn():Boolean { return tokenNotExpired(); }
 
   public isAdmin():Boolean {
-    console.log('isAdmin() - validating if current user has admin role. ');
+    // console.log('isAdmin() - validating if current user has admin role. ');
     let account:any = this.getAccount();
     return (account.roles && account.roles.indexOf(1) !== -1);
   }
