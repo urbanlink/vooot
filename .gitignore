@@ -167,3 +167,5 @@ frontend/e2e/*.map
 # System Files
 .DS_Store
 Thumbs.db
+/documentation/data-models/vooot-database-diagram.mwb
+/documentation/data-models/vooot-database-diagram.mwb.bak
