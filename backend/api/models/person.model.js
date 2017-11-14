@@ -69,6 +69,11 @@ module.exports = function(sequelize, DataTypes) {
       as: 'jobs'
     });
 
+    Model.belongsToMany(models.account, {
+      as: 'followers',
+      through: 'person_followers'
+    });
+
   };
 
   return Model;

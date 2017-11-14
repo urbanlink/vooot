@@ -2,7 +2,6 @@
   <div class="page-header">
     <div class="container">
       <div class="col-sm-12">
-        <h1>voOot</h1>
         <p>Met voOot is het gemakkelijk de ontwikkelingen van de raad te volgen en in contact te komen met elkaar. </p>
       </div>
     </div>
@@ -11,11 +10,14 @@
   <div class="page-body ">
     <div class="container">
       <div class="row">
-        <div class="col text-center">
-          <a [routerLink]="['/person']" class="btn btn-primary">Personen</a>
+        <div class="col-sm-2">
+          News feed
         </div>
-        <div class="col text-center">
-          <a [routerLink]="['/gemeente']" class="btn btn-primary">Gemeente</a>
+        <div class="col-md-8">
+          <user-timeline></user-timeline>
+        </div>
+        <div class="col-sm-2">
+          <user-notifications></user-notifications>
         </div>
       </div>
     </div>

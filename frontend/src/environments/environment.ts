@@ -7,5 +7,11 @@ export const env = {
   production: false,
   // apiRoot: 'https://api.vooot.nl',
   apiRoot: 'http://localhost:8000',
-  version: '0.1.0'
+  version: '0.1.0',
+
+  getStream: {
+    appKey: '96shmhxxay2d',
+    appId: '16235',
+    location: 'eu-west'
+  }
 };

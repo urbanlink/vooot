@@ -47,6 +47,11 @@ module.exports = function(app){
     acl.canUpdate,
     controller.person_job.create
   );
+  router.post('/:personId/follow',
+    validator.areParamsInt,
+    acl.canUpdate,
+    controller.person.follow
+  );
 
 
   /**
@@ -85,6 +90,11 @@ module.exports = function(app){
     validator.areParamsInt,
     acl.canDelete,
     controller.person.delete
+  );
+  router.delete('/:personId/follow',
+    validator.areParamsInt,
+    acl.canUpdate,
+    controller.person.unfollow
   );
   router.delete('/:personId/othername/:othernameId',
     validator.areParamsInt,

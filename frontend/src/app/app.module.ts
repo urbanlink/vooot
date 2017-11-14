@@ -1,29 +1,35 @@
-import { NgModule } from '@angular/core';
+import { NgModule,APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule }    from '@angular/forms';
 import { Http, HttpModule, RequestOptions } from '@angular/http';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AppComponent } from './app.component';
-import { routing } from './app.routing';
 import { MomentModule } from 'angular2-moment';
 import { AuthHttp, AuthConfig } from 'angular2-jwt';
+
+import { AppRoutingModule } from './app.routing';
+
+import { CoreModule } from './core/core.module';
+import { UiModule } from './ui/ui.module';
+import { UserModule } from './user/user.module';
+
+import { AuthService } from './core/auth.service';
+
+// Custom modules
+import { GetStreamModule } from './getstream/getstream.module';
 
 // Directives
 import { AlertComponent } from './_directives/index';
 import { PersonContactComponent } from './_directives/index';
 
-import { AuthGuard } from './_guards/index';
 import {
   VoootPersonService,
   VoootOrganizationService,
   VoootMembershipService,
   AlertService,
-  AuthService,
   LoadingService } from './_services/index';
 
 import { HomeComponent } from './home/home.component';
-import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
 
 import {
   PersonListComponent,
@@ -54,10 +60,6 @@ import { FaqComponent } from './pages/faq/faq.component';
 import { TermsComponent } from './pages/terms/terms.component';
 import { PrivacyComponent } from './pages/privacy/privacy.component';
 
-import { NavComponent } from './nav/nav.component';
-import { FooterComponent } from './footer/footer.component';
-import { AccountComponent } from './account/account.component';
-
 export function authHttpServiceFactory(http: Http, options: RequestOptions) {
   return new AuthHttp(new AuthConfig(), http, options);
 }
@@ -66,18 +68,20 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
   imports: [
     BrowserModule,
     FormsModule,
-    routing,
+    AppRoutingModule,
     HttpModule,
     NgbModule.forRoot(),
-    MomentModule
+    MomentModule,
+    CoreModule,
+    UiModule,
+    UserModule,
+    GetStreamModule
   ],
   declarations: [
     AppComponent,
     AlertComponent,
     PersonContactComponent,
     HomeComponent,
-    LoginComponent,
-    RegisterComponent,
     PersonListComponent,
     PersonDetailComponent,
     PersonEditComponent,
@@ -86,10 +90,6 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
     OrganizationDetailComponent,
     OrganizationEditComponent,
     OrganizationCreateComponent,
-
-    NavComponent,
-    FooterComponent,
-    AccountComponent,
 
     PageComponent,
     ClaimComponent,
@@ -107,14 +107,12 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
 
   ],
   providers: [
-    AuthGuard,
     AlertService,
     {
       provide: AuthHttp,
       useFactory: authHttpServiceFactory,
       deps: [Http, RequestOptions]
     },
-    AuthService,
     VoootPersonService,
     VoootOrganizationService,
     VoootMembershipService,

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-
-import { AlertService, AuthService, VoootOrganizationService } from './../../_services/index';
+import { AuthService } from './../../core/auth.service';
+import { AlertService, VoootOrganizationService } from './../../_services/index';
 
 @Component({
     moduleId: module.id,

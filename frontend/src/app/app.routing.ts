@@ -1,8 +1,11 @@
+import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { AuthGuard } from './core/auth.guard';
+import { CoreModule } from './core/core.module'
 
 import { HomeComponent } from './home/home.component';
-import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
+import { LoginComponent } from './user/login/login.component';
+import { RegisterComponent } from './user/register/register.component';
 
 import { PersonListComponent } from './person/index';
 import { PersonDetailComponent } from './person/index';
@@ -15,7 +18,7 @@ import {
   OrganizationEditComponent,
   OrganizationCreateComponent } from './organization/index';
 
-import { AccountComponent } from './account/account.component';
+import { AccountComponent } from './user/account/account.component';
 
 import { VertegenwoordigersComponent } from './pages/vertegenwoordigers/vertegenwoordigers.component';
 import { OverheidComponent } from './pages/overheid/overheid.component';
@@ -30,9 +33,7 @@ import { FaqComponent } from './pages/faq/faq.component';
 import { TermsComponent } from './pages/terms/terms.component';
 import { PrivacyComponent } from './pages/privacy/privacy.component';
 
-import { AuthGuard } from './_guards/index';
-
-const appRoutes: Routes = [
+const routes: Routes = [
 
   // { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -70,4 +71,10 @@ const appRoutes: Routes = [
   { path: '**', redirectTo: '' }
 ];
 
-export const routing = RouterModule.forRoot(appRoutes);
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+  providers: [AuthGuard]
+})
+
+export class AppRoutingModule { }

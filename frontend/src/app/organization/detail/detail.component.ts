@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-
+import { AuthService } from './../../core/auth.service';
 import {
   AlertService,
-  AuthService,
   VoootMembershipService,
   VoootOrganizationService } from './../../_services/index';
 
