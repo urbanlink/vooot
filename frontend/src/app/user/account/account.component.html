@@ -1,0 +1,44 @@
+<div class="page-wrapper page-account" *ngIf="!loading">
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <h1>Account settings</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-3 side-menu">
+        <ul>
+          <li><a routerLink="/account" routerLinkActive="active">Account</a></li>
+        </ul>
+      </div>
+      <div class="col-9 main-content">
+        <div class="settings-box">
+          <div class="box-header">
+            <h3>Settings</h3>
+          </div>
+          <div class="box-content">
+            <div class="box-content-section">
+              <dl>
+                <dt>ID</dt>
+                <dd>{{ user.account.id || '&nbsp;' }}</dd>
+                <dt>Email</dt>
+                <dd>{{ user.account.email || '&nbsp;' }}</dd>
+                <dt>Name</dt>
+                <dd>{{ user.name || '&nbsp;' }}</dd>
+                <dt>Picture</dt>
+                <dd>{{ user.picture || '&nbsp;' }}</dd>
+                <dt>Token</dt>
+                <dd>{{ user.accessToken || '&nbsp;' }}</dd>
+              </dl>
+            </div>
+            <div class="box-content-section">
+              <a href (click)="logout($event); false" class="btn btn-primary">Logout</a>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

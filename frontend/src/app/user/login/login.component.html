@@ -1,0 +1,37 @@
+<div class="login-wrapper">
+  <div class="row">
+    <div class="col text-center brand-img">
+      <img src="/assets/img/logo.png" class="img-fluid">
+    </div>
+  </div>
+  <div class="container">
+  <div class="row justify-content-center">
+      <div class="col-sm-12 col-md-4">
+        <div class="login-box">
+          <h2>Login</h2>
+          <form name="form" (ngSubmit)="f.form.valid && login()" #f="ngForm" novalidate>
+            <div class="form-group row">
+              <label class="col-4 col-form-label" for="username">Email</label>
+              <div class="col-8">
+                <input type="text" class="form-control" name="username" [(ngModel)]="model.username" #username="ngModel" required />
+              </div>
+            </div>
+            <div class="form-group row" [ngClass]="{ 'has-error': f.submitted && !password.valid }">
+              <label class="col-4 col-form-label" for="password">Password</label>
+              <div class="col-8">
+                <input type="password" class="form-control" name="password" [(ngModel)]="model.password" #password="ngModel" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <button type="submit" role="button" [disabled]="loading" class="btn btn-primary">Login</button>
+            </div>
+          </form>
+          <div class="actions">
+            <a [routerLink]="['/register']" class="btn btn-link">Registreren</a>
+            <a [routerLink]="['/password']" class="btn btn-link">Wachtwoord vergeten</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
