@@ -2,10 +2,8 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import {
-  AuthService,
-  AlertService,
-  VoootPersonService } from './../../_services/index';
+import { AlertService, VoootPersonService } from './../../_services/index';
+import { AuthService } from './../../core/auth.service';
 
 @Component({
     moduleId: module.id,

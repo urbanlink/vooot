@@ -6,6 +6,8 @@ var Sequelize = require('sequelize');
 var settings    = require('../../config/settings');
 var env       = settings.env;
 var logger = require('../../config/logger');
+var stream_node = require('getstream-node');
+var streamConfig = require('../../config/stream');
 
 // Initialize the database connection
 var sequelize = new Sequelize(settings.db.name, settings.db.username, settings.db.password, settings.db.settings);
@@ -42,6 +44,7 @@ sequelize.authenticate().then(function() {
       return true;
     });
   }
+
 }).catch(function(err) {
   logger.debug('Unable to connect to the database:', err);
 });

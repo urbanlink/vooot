@@ -1,15 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-
-import { AlertService, AuthService } from '../_services/index';
+import { AlertService } from '../../_services/index';
+import { AuthService } from './../../core/auth.service';
 
 @Component({
-  moduleId: module.id,
   selector: 'app-login',
-    templateUrl: 'login.component.html',
-    styleUrls: ['_login.component.scss']
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
-
 export class LoginComponent implements OnInit {
 
   model: any = {};
@@ -54,4 +52,5 @@ export class LoginComponent implements OnInit {
           this.loading = false;
         });
   }
+
 }

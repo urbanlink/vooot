@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from './../_services/index';
+import { AuthService } from './../../core/auth.service';
 
 @Component({
   selector: module.id,
@@ -8,10 +8,16 @@ import { AuthService } from './../_services/index';
 })
 export class AccountComponent implements OnInit {
 
+  public loading:Boolean;
   private user: any;
-  loading:Boolean;
 
   constructor(private auth:AuthService) { }
+
+  public handleAuthenticated() {
+    console.log('handleAuthenticated');
+
+  }
+
 
   private logout():void {
     console.log('logout');
@@ -21,9 +27,10 @@ export class AccountComponent implements OnInit {
   ngOnInit() {
     // get current user
     this.loading = true;
+
     this.auth.me().subscribe(
       data => {
-        console.log(data);
+        // console.log(data);
         this.user = {
           account: this.auth.getAccount(),
           profile: this.auth.getProfile(),

@@ -18,31 +18,38 @@ export class AuthService {
     private router:Router
   ) {}
 
+  public handleAuthenticated() {
+
+  }
+
+  public handleNotAuthenticated() {
+
+  }
   // Check if there is a current user that can be logged in
   // ( validate or renew JWT Token )
   public checkLogin():void {
     // Return true if user has a valid token.
-    console.log('checkLogin() - Validate login status. ');
+    console.log('[auth.service] Validate login status.');
     if (this.isLoggedIn()) {
-      console.log('checkLogin() - User is looged in. ');
+      console.log('[auth.service] User is looged in. ');
       return this.authUser.next(true);
     }
     // Return false if there is not token present.
-    console.log('checkLogin() - getAccessToken. ');
+    console.log('[auth.service] getAccessToken. ');
     if (!this.getToken())  {
-      console.log('checkLogin() - No access token present. User nog logged in and no session. ');
+      console.log('[auth.service] No access token present. User nog logged in and no session. ');
       return this.authUser.next(false);
     }
 
     // There is an old token present, try to renew this token.
-    console.log('checkLogin() - Trying to get a new access token with the refreshToken. ');
+    console.log('[auth.service] Trying to get a new access token with the refreshToken. ');
     this.updateToken().subscribe(
       data => {
-        console.log('checkLogin() - access token updated. ', data);
+        console.log('[auth.service] Access token updated. ', data);
         this.authUser.next(true)
       },
       error => {
-        console.log('Error updating token', error);
+        console.log('[auth.service] Error updating token', error);
         this.authUser.next(false);
       }
     );
@@ -52,7 +59,7 @@ export class AuthService {
   public isLoggedIn():Boolean { return tokenNotExpired(); }
 
   public isAdmin():Boolean {
-    // console.log('isAdmin() - validating if current user has admin role. ');
+    // console.log('[auth.service] isAdmin() - validating if current user has admin role. ');
     let account:any = this.getAccount();
     return (account.roles && account.roles.indexOf(1) !== -1);
   }
@@ -61,13 +68,17 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
-  public getAccount() {
+  public getAccount():any {
     let a = localStorage.getItem('account');
     let account = {};
     if (a!='undefined') {
       account = JSON.parse(a);
     }
     return account;
+  }
+
+  public getAccountId():Number {
+    return this.getAccount().id;
   }
 
   public getProfile() {
@@ -87,15 +98,15 @@ export class AuthService {
       })
       .map(res=>res.json())
       .do((data) => {
-        console.log('updateToken() - result: ', data);
+        console.log('[auth.service] updateToken() result: ', data);
 
         if (data.token && data.token.access_token) {
-          console.log('updateToken() - Setting local storage. ');
+          console.log('[auth.service] updateToken() Setting local storage. ');
           localStorage.setItem('account', JSON.stringify(data.account));
           localStorage.setItem('profile', JSON.stringify(data.profile));
           localStorage.setItem('token', data.token.access_token);
         } else {
-          console.log('updateToken() - No token received. logout. ');
+          console.log('[auth.service] updateToken() No token received. logout. ');
           this.logout();
         }
       }
@@ -105,20 +116,19 @@ export class AuthService {
 
   // Register a new user.
   public register(params) {
-    console.log('Starting registration');
-    console.log(params);
+    console.log('[auth.service] Starting registration', params);
     return this.authHttp.post(
       env.apiRoot + '/account/login',
       params
     ).map((response:Object) => {
-      console.log('response');
+      console.log('[auth.service] response');
       return response;
     });
   }
 
   // Login an existing user.
   public login(username: string, password: string) {
-    console.log('authService - login');
+    console.log('[auth.service] authService - login');
     return this.http.post(
       env.apiRoot + '/account/login', {
         username: username,
@@ -133,7 +143,7 @@ export class AuthService {
         localStorage.setItem('token', user.token.access_token);
         localStorage.setItem('refreshToken', user.token.refresh_token);
       } else {
-        console.log('Something went wrong: ', user);
+        console.log('[auth.service] Something went wrong: ', user);
       }
 
       return response;
@@ -143,7 +153,7 @@ export class AuthService {
   //
   public logout() {
     // remove user from local storage to log user out
-    console.log('logout current user. ');
+    console.log('[auth.service] logout current user. ',null);
     localStorage.removeItem('account');
     localStorage.removeItem('profile');
     localStorage.removeItem('token');
@@ -171,15 +181,15 @@ export class AuthService {
   }
 
   public me():Observable<Object> {
-    console.log('authService - profile');
+    console.log('[auth.service] authService - profile',null);
     return this.authHttp.post(
       env.apiRoot + '/account/me',{}
     ).map((response:Response) => {
       let user = response.json();
-      console.log(user);
+      console.log('[auth.service] user', user);
       localStorage.setItem('account', JSON.stringify(user.account));
       localStorage.setItem('profile', JSON.stringify(user.profile));
-      console.log('Profile updated', user);
+      console.log('[auth.service] Profile updated', user);
 
       return user;
     });

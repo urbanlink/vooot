@@ -6,6 +6,7 @@ var models = require('../models/index');
 var settings = require('../../config/settings');
 var logger = require('../../config/logger');
 
+var getStream = require('./getstream.controller');
 
 // error handler
 function handleError(res, err) {
@@ -136,10 +137,23 @@ exports.create = function(req,res) {
 
 // Update a person record
 exports.update = function(req,res) {
-  logger.info('Updating person ', req.params.personId, req.body);
+  logger.info('Updating person with id: ' + req.params.personId, req.body);
   models.person.update(req.body, {
     where: { id: req.params.personId }
   }).then(function(result) {
+
+    // create a getStream activity
+    var FeedManager = require('../../config/stream').feedManager;
+    var feed = FeedManager.getFeed('person', req.params.personId);
+    var activity = {
+        actor: 'user:' + req.user.id,
+        verb: 'updated',
+        object: req.params.personId,
+        message: 'Profile was updated!'
+    };
+    console.log('[person.controller] creating new activity', activity);
+    feed.addActivity(activity);
+
     return res.json(result);
   }).catch(function(err){
     return handleError(res,err);
@@ -166,60 +180,52 @@ exports.delete = function(req,res){
 
 
 
-// exports.follow = function(req,res) {
-//   logger.info('Person controller: Follow person.');
-//   logger.info(req.body);
-//   // First find the person
-//   models.person.findById(req.body.person_id).then(function(person) {
-//     // then find the account
-//     models.account.findById(req.body.account_id).then(function(account) {
-//       if (account){
-//         person.addFollower(account).then(function(result) {
-//
-//           // stream.follow({
-//           //   user_id: req.body.account_id,
-//           //   follower_type: 'person',
-//           //   follower_id: req.body.person_id,
-//           //   insertId: 1,
-//           //   created_at: new Date()
-//           // }, function(result) {
-//           //   logger.info(result);
-//           // });
-//
-//           return res.json(result);
-//         }).catch(function(error){
-//           return handleError(res,error);
-//         });
-//       } else {
-//         return handleError(res,'Account not found');
-//       }
-//     });
-//   }).catch(function(error) {
-//     return handleError(error);
-//   });
-// };
-//
-// exports.unfollow = function(req,res) {
-//   // first find the person
-//   models.person.findById(req.body.person_id).then(function(person) {
-//     if (person) {
-//       // then find the account
-//       models.account.findById(req.body.account_id).then(function(account) {
-//         if (account){
-//           person.removeFollower(account).then(function(result){
-//             return res.json(result);
-//           }).catch(function(error){
-//             return handleError(res, error);
-//           });
-//         } else {
-//           return handleError(res,'Account not found');
-//         }
-//       });
-//     }
-//   }).catch(function(error) {
-//     return handleError(error);
-//   });
-// };
+exports.follow = function(req,res) {
+  logger.info('Person controller: Follow person.');
+  logger.info(req.body);
+  if (!req.body.person_id) { return handleError(res,{msg: 'person_id is required. '}); }
+  // First find the person
+  models.person.findById(req.body.person_id).then(function(person) {
+    if (!person) { return handleError(res, {msg: 'person not found. '}); }
+    // then find the account
+    models.account.findById(req.user.id).then(function(account) {
+      if (!account) { return handleError(res,'Account not found'); }
+      person.addFollower(account).then(function(result) {
+
+        // if success create getstream follow
+        getStream.follow(req.user.id, 'person', req.body.person_id);
+
+
+        return res.json(result);
+      }).catch(function(error){
+        return handleError(res,error);
+      });
+    });
+  }).catch(function(error) {
+    return handleError(error);
+  });
+};
+
+exports.unfollow = function(req,res) {
+  if (!req.body.person_id) { return handleError(res,{msg: 'person_id is required. '}); }
+  models.person.findById(req.body.person_id).then(function(person) {
+    if (!person) { return handleError(res, {msg: 'person not found. '}); }
+    models.account.findById(req.user.id).then(function(account) {
+      if (!account) { return handleError(res,'Account not found'); }
+        person.removeFollower(account).then(function(result) {
+
+          // if success create getstream unfollow
+          getStream.unfollow(req.user.id, 'person', req.body.person_id);
+
+          return res.json(result);
+        }).catch(function(error){
+          return handleError(res, error);
+        });
+    });
+  }).catch(function(error) {
+    return handleError(error);
+  });
+};
 //
 //
 // // person editors

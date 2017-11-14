@@ -61,6 +61,8 @@
 
                     <div class="block-section person-actions first">
                       <ul>
+                        <li><a (click)="getStream()">Get Feed</a></li>
+                        <li><a (click)="createActivity(person.id)">Create activity</a></li>
                         <li><i class="fa fa-eye"></i>Volg deze persoon</li>
                         <li><a [routerLink]="['edit']" *ngIf="auth.isAdmin()"><i class="fa fa-wrench"></i>Edit</a></li>
                       </ul>
@@ -103,11 +105,15 @@
             </div>
             </ng-template>
           </ngb-tab>
-          <!-- <ngb-tab>
-            <ng-template ngbTabTitle>Activiteiten</ng-template>
+
+          <ngb-tab>
+            <ng-template ngbTabTitle>Stream</ng-template>
             <ng-template ngbTabContent>
+              <div class="small" *ngFor="let r of stream.results">
+                <pre>{{ r | json }}</pre>
+              </div>
             </ng-template>
-          </ngb-tab> -->
+          </ngb-tab>
 
           <!-- <ngb-tab title="Bio">
             <ng-template ngbTabContent>
