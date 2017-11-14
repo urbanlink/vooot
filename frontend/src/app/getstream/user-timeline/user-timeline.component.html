@@ -1,0 +1,10 @@
+
+<div class="col">
+  <div class="loader" *ngIf="!timeline"><i class="fa fa-spin fa-spinner"></i></div>
+  <div class="item" *ngFor="let item of timeline">
+    <span class="date">{{ item.time | date:'yyyy-MM-dd h:mm' }}</span>
+    <div class="message">
+      {{ item.actor }} - <strong>{{item.verb}}</strong> - {{item.origin}}: <em>{{item.message}}</em>
+    </div>
+  </div>
+</div>

@@ -54,5 +54,13 @@ module.exports = {
 
   mail : {
     sendgridKey : process.env.SENDGRID_API_KEY || env.SENDGRID_API_KEY || '',
+  },
+
+  getStream: {
+    key: process.env.GETSTREAM_API_KEY || env.GETSTREAM_API_KEY || '',
+    secret: process.env.GETSTREAM_API_SECRET || env.GETSTREAM_API_SECRET || '',
+    appId: process.env.GETSTREAM_APPID || env.GETSTREAM_APPID || '',
+    location: process.env.GETSTREAM_LOCATION || env.GETSTREAM_LOCATION || ''
   }
+
 };

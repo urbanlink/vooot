@@ -1,0 +1,14 @@
+<div class="col">
+  <h3>Notificaties</h3>
+  <div class="loader" *ngIf="!notifications"><i class="fa fa-spin fa-spinner"></i></div>
+  <div class="notifications-list" *ngIf="notifications">
+    <div *ngIf="notifications.length != 0">Geen notifications</div>
+    <div class="item" *ngFor="let item of notifications">
+      <span class="date">{{ item.time | date:'yyyy-MM-dd h:mm' }}</span>
+      <div class="message">
+        {{ item.actor }} - <strong>{{item.verb}}</strong> - {{item.origin}}: <em>{{item.message}}</em>
+      </div>
+      <hr>
+    </div>
+  </div>
+</div>
